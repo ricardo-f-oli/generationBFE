@@ -1,0 +1,205 @@
+.pageRoot {
+  padding: 48px;
+  display: flex;
+  justify-content: center;
+}
+
+.formWrapper {
+  max-width: 640px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.backLink {
+  cursor: pointer;
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.pageHeading {
+  font-family: var(--font-display);
+  font-size: 40px;
+}
+
+.fieldColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.brandSelect {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  background-color: var(--color-white);
+}
+
+.textareaField {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 15px;
+  resize: vertical;
+}
+
+.deliverablesRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.deliverablePill {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 1px solid var(--border-default);
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.deliverablePillActive {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+
+.budgetRow {
+  display: flex;
+  gap: 12px;
+}
+
+.budgetInputWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+}
+
+.currencySymbol {
+  color: var(--text-muted);
+}
+
+.budgetInput {
+  border: none;
+  outline: none;
+  padding: 10px 8px;
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.timelineRow {
+  display: flex;
+  gap: 12px;
+}
+
+.dateInput {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+}
+
+.toneOptionsRow {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.toneOptionLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clauseLibraryBox {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.clauseLibraryHeader {
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.clauseListBox {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clauseItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background-color: var(--color-grey);
+  border-radius: var(--radius-sm);
+  cursor: grab;
+}
+
+.clauseGripIcon {
+  color: var(--text-muted);
+}
+
+.clauseLabel {
+  flex: 1;
+  font-size: 13px;
+}
+
+.clauseRemoveBtn {
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+  color: var(--text-muted);
+}
+
+.submitActionsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.helperText {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.successMessage {
+  font-size: 13px;
+  color: var(--color-red);
+  text-align: center;
+  font-weight: var(--weight-bold);
+}

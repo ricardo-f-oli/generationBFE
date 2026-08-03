@@ -1,0 +1,87 @@
+:root {
+  /* Brand Palette */
+  --color-red: #E00008;
+  --color-lemon: #FFFF99;
+  --color-black: #000000;
+  --color-grey: #EEEEEE;
+  --color-peach: #F7D0B8;
+  --color-lime: #E6FAA5;
+  --color-white: #FFFFFF;
+
+  /* Surfaces */
+  --surface-page: var(--color-white);
+  --surface-muted: var(--color-grey);
+  --surface-peach: var(--color-peach);
+  --surface-lime: var(--color-lime);
+  --surface-lemon: var(--color-lemon);
+  --surface-inverse: var(--color-black);
+
+  /* Typography Colors */
+  --text-primary: var(--color-black);
+  --text-inverse: var(--color-white);
+  --text-brand: var(--color-red);
+  --text-muted: #6B6B6B;
+
+  /* Borders */
+  --border-default: var(--color-black);
+  --border-subtle: #D8D8D8;
+  --border-brand: var(--color-red);
+
+  /* Focus & Focus Rings */
+  --focus-ring: var(--color-red);
+
+  /* Fonts */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-wide: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Letter Spacing */
+  --tracking-normal: 0em;
+  --tracking-wide: 0.09em;
+  --tracking-wider: 0.14em;
+
+  /* Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+  --weight-black: 800;
+
+  /* Font Sizes */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.25rem;
+  --fs-3xl: 3rem;
+  --fs-4xl: 4rem;
+  --fs-5xl: 5.5rem;
+
+  /* Line Heights */
+  --lh-tight: 1.02;
+  --lh-snug: 1.15;
+  --lh-normal: 1.5;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+  --space-11: 192px;
+
+  /* Radii */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-pill: 999px;
+
+  /* Border Widths */
+  --border-w: 1px;
+  --border-w-thick: 2px;
+}

@@ -1,0 +1,167 @@
+.loadingState {
+  padding: 40px 48px;
+  color: var(--text-muted);
+}
+
+.root {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 1240px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.campaignSelect {
+  font-family: var(--font-display);
+  font-size: 32px;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.actionButtonsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+}
+
+.actionMessage {
+  font-size: 13px;
+  color: var(--color-red);
+  font-weight: bold;
+  margin-right: auto;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tableHeadRow {
+  background-color: var(--color-grey);
+  text-align: left;
+}
+
+.tableHeadCell {
+  padding: 12px 14px;
+  font: var(--weight-bold) 10px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.tableRow {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.tableCell {
+  padding: 12px 14px;
+}
+
+.tableCellBold {
+  padding: 12px 14px;
+  font-weight: var(--weight-bold);
+}
+
+.tableCellAction {
+  padding: 12px 14px;
+  color: var(--color-red);
+  cursor: pointer;
+}
+
+.statusPill {
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.directPanel {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.directPanelHeader {
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.directPanelBody {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recipientsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionLabel {
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.recipientCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.notesLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notesTextarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  resize: vertical;
+}
+
+.compSlipSummary {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.reviewPendingLink {
+  color: var(--color-red);
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+}

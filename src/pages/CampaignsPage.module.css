@@ -1,0 +1,229 @@
+.loadingState {
+  padding: 40px 48px;
+  color: var(--text-muted);
+}
+
+.pageRoot {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 1280px;
+}
+
+.boardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.headerTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campaignSelect {
+  font-family: var(--font-display);
+  font-size: 32px;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.headerSubtitle {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.kanbanColumnsRow {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+
+.kanbanColumn {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kanbanColumnHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kanbanColumnTitle {
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.kanbanColumnCount {
+  background-color: var(--color-grey);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  padding: 2px 8px;
+  font-weight: var(--weight-bold);
+}
+
+.kanbanCard {
+  background-color: var(--color-white);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--color-black);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kanbanCardMediheal {
+  border-left-color: var(--color-red);
+}
+
+.kanbanCardHandle {
+  font-weight: var(--weight-bold);
+  font-size: 14px;
+}
+
+.kanbanCardDeliverable {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.kanbanCardDeadline {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.paymentBadge {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-lemon);
+  color: var(--color-black);
+}
+
+.paymentBadgePaid {
+  background-color: var(--color-lime);
+}
+
+.addCreatorLink {
+  font-size: 12px;
+  color: var(--color-red);
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+}
+
+.drawerBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 30;
+}
+
+.drawerPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 440px;
+  background-color: var(--color-white);
+  border-left: 1px solid var(--border-default);
+  z-index: 31;
+  padding: 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.drawerHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawerHandleTitle {
+  font-family: var(--font-display);
+  font-size: 26px;
+}
+
+.drawerCloseBtn {
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: var(--weight-bold);
+}
+
+.drawerSubtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.drawerFieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drawerFieldGroupSpaced {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawerFieldLabel {
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.drawerFieldValue {
+  font-size: 15px;
+}
+
+.contentDraftsBox {
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.uploadButtonWrap {
+  margin-top: 12px;
+}
+
+.commentItem {
+  font-size: 13px;
+  padding: 10px;
+  background-color: var(--color-grey);
+  border-radius: var(--radius-sm);
+}
+
+.markPaidRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.markPaidLabel {
+  font-size: 13px;
+  font-weight: var(--weight-bold);
+}

@@ -1,0 +1,289 @@
+.loadingText {
+  padding: 40px 48px;
+  color: var(--text-muted);
+}
+
+.page {
+  padding: 40px 48px;
+  display: flex;
+  gap: 32px;
+  min-width: 1240px;
+}
+
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebarItem {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: var(--weight-bold);
+  background-color: transparent;
+  color: var(--color-black);
+}
+
+.sidebarItemActive {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sectionHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 30px;
+}
+
+.panelLabel {
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tableHeaderRow {
+  background-color: var(--color-grey);
+  text-align: left;
+}
+
+.th {
+  padding: 10px 14px;
+}
+
+.tr {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.td {
+  padding: 10px 14px;
+}
+
+.tdBold {
+  padding: 10px 14px;
+  font-weight: var(--weight-bold);
+}
+
+.tdMuted {
+  padding: 10px 14px;
+  color: var(--text-muted);
+}
+
+.tdRemove {
+  padding: 10px 14px;
+  color: var(--color-red);
+  cursor: pointer;
+}
+
+.roleSelect {
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+.integrationsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.integrationCard {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.integrationCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.integrationIcon {
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-grey);
+  border-radius: var(--radius-sm);
+}
+
+.integrationStatusPill {
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.integrationName {
+  font-weight: var(--weight-bold);
+  font-size: 15px;
+}
+
+.integrationDesc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.gdprGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.gdprColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gdprSearchInput {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.gdprListBox {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.consentRow {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.consentHandle {
+  font-weight: var(--weight-bold);
+  font-size: 13px;
+}
+
+.consentMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.eraseLink {
+  color: var(--color-red);
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+}
+
+.suppressionRow {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.suppressionHandle {
+  font-weight: var(--weight-bold);
+  font-size: 13px;
+}
+
+.suppressionMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.auditListBox {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.auditRow {
+  display: grid;
+  grid-template-columns: 140px 100px 90px 90px 1fr 1fr 20px;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  font-size: 12px;
+  align-items: center;
+}
+
+.auditTimestamp {
+  color: var(--text-muted);
+}
+
+.auditUser {
+  font-weight: var(--weight-bold);
+}
+
+.auditPreviousValue {
+  color: var(--text-muted);
+}
+
+.auditDetailPanel {
+  padding: 12px 14px;
+  background-color: var(--color-grey);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.fallbackBox {
+  color: var(--text-muted);
+  font-size: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modalSelect {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}

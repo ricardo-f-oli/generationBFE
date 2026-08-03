@@ -1,0 +1,158 @@
+.loadingState {
+  padding: 40px 48px;
+  color: var(--text-muted);
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mainRow {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.composerPane {
+  width: 60%;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-right: 1px solid var(--border-subtle);
+  overflow-y: auto;
+}
+
+.pageTitle {
+  font-family: var(--font-display);
+  font-size: 36px;
+}
+
+.templateSelect {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  background-color: var(--color-white);
+}
+
+.subjectInput {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.mergeTokensRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mergeToken {
+  padding: 6px 12px;
+  background-color: var(--color-lemon);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+}
+
+.bodyTextarea {
+  padding: 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 14px;
+  resize: vertical;
+}
+
+.sectionLabel {
+  font: var(--weight-bold) 11px/1 var(--font-wide);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sectionLabelSpaced {
+  margin-bottom: 8px;
+}
+
+.previewBox {
+  background-color: var(--color-grey);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+.recipientsPane {
+  width: 40%;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.recipientSearchInput {
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+}
+
+.recipientList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recipientRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.recipientHandle {
+  flex: 1;
+  font-size: 13px;
+  font-weight: var(--weight-bold);
+}
+
+.actionFooter {
+  background-color: var(--color-white);
+  border-top: 1px solid var(--border-default);
+  padding: 16px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerText {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.footerButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  z-index: 40;
+}
