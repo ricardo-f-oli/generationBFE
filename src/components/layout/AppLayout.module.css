@@ -1,136 +1,330 @@
+/* Layout chrome. Every value comes from the prototype design system tokens —
+   no colour, font or radius is introduced here. */
+
 .container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
-  background-color: var(--color-white);
+  background: var(--surface-page);
   font-family: var(--font-body);
-  color: var(--color-black);
-  overflow: hidden;
 }
 
+/* ------------------------------------------------------------- sidebar */
+
 .sidebar {
-  width: 216px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--border-subtle);
+  width: 236px;
+  flex: none;
+  background: var(--surface-muted);
+  border-right: var(--border-w) solid var(--border-default);
   display: flex;
   flex-direction: column;
-  padding: 24px 0;
+  padding: var(--space-5) 0 var(--space-4);
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 
 .logo {
   font-family: var(--font-display);
-  font-size: 28px;
-  padding: 0 24px 28px;
-  line-height: 1;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  padding: 0 var(--space-5) var(--space-5);
   cursor: pointer;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--text-primary);
+  width: 100%;
 }
 
-.navItem {
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  flex: 1;
+}
+
+/* Parent row: a button when it has children, a link when it does not. */
+.navGroupHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  border-left: 3px solid transparent;
-  color: var(--color-black);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  text-align: left;
   text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
-.navItemActive {
-  border-left: 3px solid var(--color-red);
-  color: var(--color-red);
+.navGroupHeader:hover {
+  background: var(--color-white);
 }
 
-.navItemLabel {
-  font: var(--weight-bold) 11px/1 var(--font-wide);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: inherit;
+.navGroupHeaderActive {
+  background: var(--color-white);
+  box-shadow: var(--shadow-flat);
+}
+
+.navIcon {
+  width: 18px;
+  flex: none;
+  text-align: center;
+  font-size: var(--fs-sm);
+}
+
+.navLabel {
+  flex: 1;
+}
+
+.chevron {
+  font-size: 10px;
+  transition: transform var(--duration-normal) var(--ease-standard);
+  color: var(--text-muted);
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* Children of a parent nav item. */
+.navChildren {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 var(--space-2) 0;
+  padding-left: calc(var(--space-3) + 18px + var(--space-3));
+  border-left: var(--border-w) solid var(--border-subtle);
+  margin-left: calc(var(--space-3) + 9px);
+}
+
+.navChild {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard),
+              background-color var(--duration-fast) var(--ease-standard);
+}
+
+.navChild:hover {
+  color: var(--text-primary);
+  background: var(--color-white);
+}
+
+.navChildActive {
+  color: var(--text-brand);
+  font-weight: var(--weight-bold);
+  background: var(--color-white);
+}
+
+.sidebarFooter {
+  padding: var(--space-4) var(--space-5) 0;
+  border-top: var(--border-w) solid var(--border-subtle);
+  margin-top: var(--space-4);
 }
 
 .signupLink {
-  margin-top: auto;
-  padding: 12px 24px;
-  cursor: pointer;
-  font-size: 11px;
-  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--text-brand);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
 }
+
+/* ---------------------------------------------------------------- main */
 
 .mainContainer {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
 }
 
 .topHeader {
-  height: 64px;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
-}
-
-.brandSwitcherWrapper {
-  position: relative;
-}
-
-.brandSwitcherButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font: var(--weight-bold) 12px/1 var(--font-wide);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  padding: 8px 14px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-}
-
-.brandDropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  background-color: var(--color-white);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  min-width: 180px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: var(--border-w) solid var(--border-default);
+  background: var(--surface-page);
+  position: sticky;
+  top: 0;
   z-index: 20;
 }
 
-.brandDropdownItem {
-  padding: 10px 14px;
-  cursor: pointer;
-  font-size: 14px;
+.brandBadge {
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.brandDropdownItem:hover {
-  background-color: var(--color-grey);
+.brandName {
+  color: var(--text-primary);
 }
 
 .headerActions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-4);
+  position: relative;
 }
 
-.notificationButton {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--border-default);
+.userButton {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+}
+
+.userButton:hover {
+  background: var(--surface-muted);
+}
+
+.userMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.userName {
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+}
+
+.userRole {
+  font-size: 10px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.userMenu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  min-width: 180px;
+  background: var(--color-white);
+  border: var(--border-w-thick) solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.userMenuItem {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-brand);
+  cursor: pointer;
+}
+
+.userMenuItem:hover {
+  background: var(--surface-muted);
 }
 
 .contentOutlet {
   flex: 1;
-  overflow-y: auto;
+  padding: var(--space-6);
+  min-width: 0;
+}
+
+/* --------------------------------------------------------- responsive */
+
+.menuToggle {
+  display: none;
+  background: none;
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .menuToggle {
+    display: inline-flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform var(--duration-normal) var(--ease-standard);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 150;
+    border: none;
+  }
+
+  .contentOutlet {
+    padding: var(--space-4);
+  }
+
+  .topHeader {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .chevron,
+  .navChild,
+  .navGroupHeader {
+    transition: none;
+  }
 }

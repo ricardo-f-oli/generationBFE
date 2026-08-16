@@ -1,0 +1,43 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brand {
+  background: var(--color-red);
+  color: var(--color-white);
+}
+
+.lime {
+  background: var(--color-lime);
+  color: var(--color-black);
+}
+
+.peach {
+  background: var(--color-peach);
+  color: var(--color-black);
+}
+
+.lemon {
+  background: var(--color-lemon);
+  color: var(--color-black);
+}
+
+.neutral {
+  background: var(--color-grey);
+  color: var(--color-black);
+}
+
+.outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: var(--border-w) solid var(--border-default);
+}

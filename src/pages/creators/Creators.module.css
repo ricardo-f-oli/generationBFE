@@ -1,0 +1,208 @@
+/* Creator database + detail. Prototype tokens only. */
+
+.searchRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+
+.searchInput {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  color: var(--text-primary);
+}
+
+.searchInput:focus-visible {
+  outline: var(--border-w-thick) solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.selectionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-lemon);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------ card grid */
+
+.creatorCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-white);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.cardIdentity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.handleButton {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.handleButton:hover {
+  color: var(--text-brand);
+}
+
+.cardMeta {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.metrics {
+  display: flex;
+  gap: var(--space-5);
+  padding: var(--space-3) 0;
+  border-top: var(--border-w) solid var(--border-subtle);
+  border-bottom: var(--border-w) solid var(--border-subtle);
+}
+
+.metricValue {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-tight);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.metricLabel {
+  font-size: 10px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.platformBadge {
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: 2px var(--space-2);
+  border: var(--border-w) solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.lastContact {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+/* --------------------------------------------------------------- detail */
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.detailName {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  line-height: var(--lh-tight);
+  margin: 0;
+}
+
+.detailHandle {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.definitionList {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-3) var(--space-4);
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+
+.definitionList dt {
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.definitionList dd {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.noteItem {
+  padding: var(--space-3) 0;
+  border-bottom: var(--border-w) solid var(--border-subtle);
+}
+
+.noteItem:last-child {
+  border-bottom: none;
+}
+
+.noteMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.noteBody {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  white-space: pre-wrap;
+}
+
+@media (max-width: 1000px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}

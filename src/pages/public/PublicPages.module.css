@@ -1,0 +1,147 @@
+/* Creator-facing pages: waitlist landing, registration, unsubscribe.
+   Prototype tokens only — the peach ground and Instrument Serif display are the brand. */
+
+.landing {
+  min-height: 100vh;
+  background: var(--surface-peach);
+  font-family: var(--font-body);
+  padding: var(--space-6) var(--space-5) var(--space-9);
+}
+
+.landingInner {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.landingHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+}
+
+.mark {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.backLink {
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-brand);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-tight);
+  margin: 0 0 var(--space-4);
+  color: var(--text-primary);
+}
+
+.lede {
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-6);
+  max-width: 46ch;
+}
+
+.rule {
+  width: 120px;
+  height: 4px;
+  background: var(--color-red);
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--color-white);
+  border: var(--border-w-thick) solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+}
+
+.consentRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  cursor: pointer;
+}
+
+.consentRow input {
+  margin-top: 3px;
+  flex: none;
+}
+
+.error {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-w) solid var(--color-red);
+  border-left: 3px solid var(--color-red);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  color: var(--color-red);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-4);
+}
+
+.confirmation {
+  background: var(--color-white);
+  border: var(--border-w-thick) solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-7) var(--space-6);
+}
+
+.stepLabel {
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.tagGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tagChip {
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--color-white);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+
+.tagChipActive {
+  background: var(--color-black);
+  color: var(--text-inverse);
+}
+
+@media (max-width: 600px) {
+  .display {
+    font-size: var(--fs-2xl);
+  }
+
+  .form {
+    padding: var(--space-5) var(--space-4);
+  }
+}

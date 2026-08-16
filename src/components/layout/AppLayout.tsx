@@ -1,107 +1,190 @@
-import React, { useState } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '../common/Avatar';
+import { useAuth } from '../../context/AuthContext';
+import { isSectionActive, NAV_ITEMS } from './navConfig';
 import styles from './AppLayout.module.css';
 
+/**
+ * Q-A9: the layout no longer takes a `children` prop. It renders the router's Outlet directly,
+ * so nested routes work and page-level context is actually delivered.
+ */
 export const AppLayout: React.FC = () => {
-  const [activeBrand, setActiveBrand] = useState('All Brands');
-  const [brandMenuOpen, setBrandMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const navItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: '▤' },
-    { label: 'Creators', path: '/creators', icon: '◈' },
-    { label: 'Campaigns', path: '/campaigns', icon: '▥' },
-    { label: 'Coverage', path: '/coverage', icon: '▦' },
-    { label: 'Outreach', path: '/outreach', icon: '➤' },
-    { label: 'Gifting', path: '/gifting', icon: '◫' },
-    { label: 'Reporting', path: '/reporting', icon: '▧' },
-    { label: 'Settings', path: '/settings', icon: '⚙' },
-  ];
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const brandOptions = ['All Brands', 'Mediheal', 'Katie Loxton', 'Joma'];
+  const visibleItems = useMemo(
+    () => NAV_ITEMS.filter((item) => !item.roles || (user && item.roles.includes(user.role))),
+    [user],
+  );
 
-  const isCampaignSubscreen =
-    location.pathname.startsWith('/campaigns') ||
-    location.pathname.startsWith('/shortlist') ||
-    location.pathname.startsWith('/brief');
+  // Sections auto-expand when you are inside them; the user can still toggle.
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const active = visibleItems.find((item) => isSectionActive(item, location.pathname));
+    if (active?.children) {
+      setExpanded((prev) => ({ ...prev, [active.path]: true }));
+    }
+    setMobileOpen(false);
+    setUserMenuOpen(false);
+  }, [location.pathname, visibleItems]);
+
+  const toggleSection = (path: string) =>
+    setExpanded((prev) => ({ ...prev, [path]: !prev[path] }));
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div className={styles.container}>
-      {/* Sidebar */}
-      <div className={styles.sidebar}>
-        <div onClick={() => navigate('/dashboard')} className={styles.logo}>
+      {mobileOpen && (
+        <button
+          type="button"
+          className={styles.backdrop}
+          aria-label="Close navigation"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <nav
+        className={`${styles.sidebar} ${mobileOpen ? styles.sidebarOpen : ''}`}
+        aria-label="Main navigation"
+      >
+        <button type="button" className={styles.logo} onClick={() => navigate('/dashboard')}>
           generation b.
-        </div>
+        </button>
 
-        {navItems.map((item) => {
-          const isActive =
-            location.pathname.startsWith(item.path) ||
-            (item.path === '/campaigns' && isCampaignSubscreen);
+        <div className={styles.nav}>
+          {visibleItems.map((item) => {
+            const sectionActive = isSectionActive(item, location.pathname);
+            const isOpen = expanded[item.path] ?? sectionActive;
 
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
-            >
-              <span>{item.icon}</span>
-              <span className={styles.navItemLabel}>{item.label}</span>
-            </NavLink>
-          );
-        })}
+            if (!item.children) {
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `${styles.navGroupHeader} ${isActive ? styles.navGroupHeaderActive : ''}`
+                  }
+                >
+                  <span className={styles.navIcon} aria-hidden="true">{item.icon}</span>
+                  <span className={styles.navLabel}>{item.label}</span>
+                </NavLink>
+              );
+            }
 
-        <div onClick={() => navigate('/register')} className={styles.signupLink}>
-          Creator sign-up (public) ↗
-        </div>
-      </div>
-
-      {/* Main Container */}
-      <div className={styles.mainContainer}>
-        {/* Top Header */}
-        <div className={styles.topHeader}>
-          {/* Brand Switcher */}
-          <div className={styles.brandSwitcherWrapper}>
-            <div onClick={() => setBrandMenuOpen(!brandMenuOpen)} className={styles.brandSwitcherButton}>
-              <span>{activeBrand}</span>
-              <span>▾</span>
-            </div>
-
-            {brandMenuOpen && (
-              <div className={styles.brandDropdown}>
-                {brandOptions.map((brand) => (
-                  <div
-                    key={brand}
-                    onClick={() => {
-                      setActiveBrand(brand);
-                      setBrandMenuOpen(false);
-                    }}
-                    className={styles.brandDropdownItem}
+            return (
+              <div key={item.path}>
+                <button
+                  type="button"
+                  className={`${styles.navGroupHeader} ${
+                    sectionActive ? styles.navGroupHeaderActive : ''
+                  }`}
+                  onClick={() => toggleSection(item.path)}
+                  aria-expanded={isOpen}
+                  aria-controls={`nav-${item.label}`}
+                >
+                  <span className={styles.navIcon} aria-hidden="true">{item.icon}</span>
+                  <span className={styles.navLabel}>{item.label}</span>
+                  <span
+                    className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
+                    aria-hidden="true"
                   >
-                    {brand}
+                    ▶
+                  </span>
+                </button>
+
+                {isOpen && (
+                  <div className={styles.navChildren} id={`nav-${item.label}`}>
+                    {item.children
+                      .filter((child) => !child.roles || (user && child.roles.includes(user.role)))
+                      .map((child) => (
+                        <NavLink
+                          key={child.path}
+                          to={child.path}
+                          end
+                          className={({ isActive }) =>
+                            `${styles.navChild} ${isActive ? styles.navChildActive : ''}`
+                          }
+                        >
+                          {child.label}
+                        </NavLink>
+                      ))}
                   </div>
-                ))}
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className={styles.sidebarFooter}>
+          <Link to="/register" className={styles.signupLink}>
+            Creator sign-up ↗
+          </Link>
+        </div>
+      </nav>
+
+      <div className={styles.mainContainer}>
+        <header className={styles.topHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <button
+              type="button"
+              className={styles.menuToggle}
+              onClick={() => setMobileOpen((open) => !open)}
+              aria-label="Toggle navigation"
+            >
+              ☰
+            </button>
+            {/* Q-F11: the fake brand switcher is gone. A user belongs to one brand (Q-C13). */}
+            <div className={styles.brandBadge}>
+              <span>Workspace</span>
+              <span className={styles.brandName}>B. The Agency</span>
+            </div>
+          </div>
+
+          <div className={styles.headerActions}>
+            <button
+              type="button"
+              className={styles.userButton}
+              onClick={() => setUserMenuOpen((open) => !open)}
+              aria-haspopup="menu"
+              aria-expanded={userMenuOpen}
+            >
+              <Avatar name={user?.name || user?.email || 'User'} size={32} />
+              <span className={styles.userMeta}>
+                <span className={styles.userName}>{user?.name ?? user?.email}</span>
+                <span className={styles.userRole}>
+                  {user?.role?.replace(/_/g, ' ').toLowerCase()}
+                </span>
+              </span>
+            </button>
+
+            {userMenuOpen && (
+              <div className={styles.userMenu} role="menu">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={styles.userMenuItem}
+                  onClick={handleLogout}
+                >
+                  Sign out
+                </button>
               </div>
             )}
           </div>
+        </header>
 
-          {/* User & Notifications */}
-          <div className={styles.headerActions}>
-            <div className={styles.notificationButton}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 01-3.46 0" />
-              </svg>
-            </div>
-            <Avatar name="Team Lead" size={36} />
-          </div>
-        </div>
-
-        {/* Content Outlet */}
-        <div className={styles.contentOutlet}>
-          <Outlet context={{ activeBrand }} />
-        </div>
+        <main className={styles.contentOutlet}>
+          <Outlet />
+        </main>
       </div>
     </div>
   );

@@ -1,103 +1,163 @@
 import React from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card } from '../components/common/Card';
+import { Page, PageHeader, AsyncBoundary, ui } from '../components/common/PageShell';
 import { Button } from '../components/common/Button';
-import { simulateDelay } from '../services/apiClient';
-import { INITIAL_KPIS, INITIAL_ACTIVITY_FEED, INITIAL_PENDING_ACTIONS } from '../mocks/mockData';
-import { KpiCardData, ActivityItem, PendingAction } from '../types';
-import styles from './DashboardPage.module.css';
+import { Tag, statusTone, humanise } from '../components/common/Tag';
+import { useAuth } from '../context/AuthContext';
+import { searchCreators, fetchPendingRegistrations } from '../services/creatorService';
+import { fetchCampaigns, fetchShortlists } from '../services/campaignService';
+import { fetchWaitlistStats } from '../services/marketingService';
 
-interface DashboardOverview {
-  kpis: KpiCardData[];
-  activityFeed: ActivityItem[];
-  pendingActions: PendingAction[];
-}
-
-// Simulates a service fetch until a dedicated dashboardService/backend endpoint exists.
-async function fetchDashboardOverview(): Promise<DashboardOverview> {
-  return simulateDelay(
-    {
-      kpis: INITIAL_KPIS,
-      activityFeed: INITIAL_ACTIVITY_FEED,
-      pendingActions: INITIAL_PENDING_ACTIONS,
-    },
-    200
-  );
-}
-
+/**
+ * Q-F9: every number on this page used to be a hardcoded literal. They are all live now.
+ * Q-A9: no useOutletContext — the brand comes from the authenticated user.
+ */
 export const DashboardPage: React.FC = () => {
-  const { activeBrand } = useOutletContext<{ activeBrand: string }>();
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery({
-    queryKey: ['dashboard-overview'],
-    queryFn: fetchDashboardOverview,
+  const { user } = useAuth();
+
+  const overview = useQuery({
+    queryKey: ['dashboard', 'overview'],
+    queryFn: async () => {
+      const [creators, campaigns, shortlists, pending, waitlist] = await Promise.all([
+        searchCreators({ size: 1 }),
+        fetchCampaigns(undefined, 0, 100),
+        fetchShortlists(),
+        fetchPendingRegistrations(0, 5),
+        fetchWaitlistStats().catch(() => ({ pending: 0, confirmed: 0, converted: 0, total: 0 })),
+      ]);
+      return { creators, campaigns, shortlists, pending, waitlist };
+    },
   });
 
-  const kpis = data?.kpis ?? [];
-  const activityFeed = data?.activityFeed ?? [];
-  const pendingActions = data?.pendingActions ?? [];
-
-  if (isLoading) {
-    return (
-      <div className={styles.loadingState}>
-        Loading dashboard overview...
-      </div>
-    );
-  }
+  const data = overview.data;
+  const activeCampaigns = data?.campaigns.items.filter((c) => c.status === 'ACTIVE') ?? [];
 
   return (
-    <div className={styles.page}>
-      <div>
-        <div className={styles.headerTitle}>dashboard</div>
-        <div className={styles.headerSubtitle}>{activeBrand} · overview</div>
-      </div>
+    <Page>
+      <PageHeader
+        title="Dashboard"
+        subtitle={`Signed in as ${user?.name ?? user?.email} · ${humanise(user?.role)}`}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => navigate('/creators')}>
+              Find creators
+            </Button>
+            <Button variant="primary" onClick={() => navigate('/campaigns')}>
+              New campaign
+            </Button>
+          </>
+        }
+      />
 
-      {/* KPI Cards Grid */}
-      <div className={styles.kpiGrid}>
-        {kpis.map((kpi, idx) => (
-          <Card key={idx} tint={kpi.tint} style={{ height: '110px' }}>
-            <div className={styles.kpiLabel}>{kpi.label}</div>
-            <div className={styles.kpiValue}>{kpi.value}</div>
-          </Card>
-        ))}
-      </div>
+      <AsyncBoundary
+        isLoading={overview.isLoading}
+        error={overview.error}
+        onRetry={() => overview.refetch()}
+        loadingLabel="Loading your workspace"
+      >
+        <div className={ui.statGrid}>
+          <div className={ui.stat}>
+            <p className={ui.statLabel}>Creators in database</p>
+            <div className={ui.statValue}>{data?.creators.meta.totalElements ?? 0}</div>
+          </div>
+          <div className={`${ui.stat} ${ui.statTintGrey}`}>
+            <p className={ui.statLabel}>Active campaigns</p>
+            <div className={ui.statValue}>{activeCampaigns.length}</div>
+          </div>
+          <div className={`${ui.stat} ${ui.statTintPeach}`}>
+            <p className={ui.statLabel}>Pending registrations</p>
+            <div className={ui.statValue}>{data?.pending.meta.totalElements ?? 0}</div>
+          </div>
+          <div className={`${ui.stat} ${ui.statTintLime}`}>
+            <p className={ui.statLabel}>Shortlists</p>
+            <div className={ui.statValue}>{data?.shortlists.length ?? 0}</div>
+          </div>
+          <div className={`${ui.stat} ${ui.statTintLemon}`}>
+            <p className={ui.statLabel}>Waitlist sign-ups</p>
+            <div className={ui.statValue}>{data?.waitlist.total ?? 0}</div>
+          </div>
+        </div>
 
-      {/* Activity Feed & Pending Actions Grid */}
-      <div className={styles.contentGrid}>
-        {/* Activity Feed */}
-        <div>
-          <div className={styles.sectionLabel}>activity feed</div>
-          <div className={styles.activityList}>
-            {activityFeed.map((item) => (
-              <div key={item.id} className={styles.activityItem}>
-                <div className={styles.activityText}>{item.text}</div>
-                <div className={styles.activityTime}>{item.time}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-5)' }}>
+          <section>
+            <p className={ui.sectionLabel}>Active campaigns</p>
+            {activeCampaigns.length === 0 ? (
+              <div className={ui.emptyState}>
+                <p className={ui.emptyTitle}>No active campaigns</p>
+                <p style={{ margin: 0 }}>Create one to start building a board.</p>
               </div>
-            ))}
-          </div>
-        </div>
+            ) : (
+              <div className={ui.tableWrap}>
+                <table className={ui.table}>
+                  <thead>
+                    <tr>
+                      <th>Campaign</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeCampaigns.slice(0, 6).map((campaign) => (
+                      <tr
+                        key={campaign.id}
+                        onClick={() => navigate(`/campaigns/board?campaignId=${campaign.id}`)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <td className={ui.cellStrong}>{campaign.name}</td>
+                        <td className={ui.cellMuted}>{humanise(campaign.campaignType)}</td>
+                        <td>
+                          <Tag tone={statusTone(campaign.status)}>{humanise(campaign.status)}</Tag>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
 
-        {/* Pending Actions */}
-        <div>
-          <div className={styles.sectionLabel}>pending actions</div>
-          <div className={styles.pendingList}>
-            {pendingActions.map((action) => (
-              <Card key={action.id} tint="grey">
-                <div className={styles.pendingCardInner}>
-                  <div>
-                    <div className={styles.pendingTitle}>{action.title}</div>
-                    <div className={styles.pendingSubtitle}>{action.subtitle}</div>
-                  </div>
-                  <Button variant="primary" size="sm" onClick={() => navigate(action.targetScreen)}>
-                    {action.actionLabel}
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+          <section>
+            <p className={ui.sectionLabel}>Awaiting your review</p>
+            {(data?.pending.items.length ?? 0) === 0 ? (
+              <div className={ui.emptyState}>
+                <p className={ui.emptyTitle}>Nothing pending</p>
+                <p style={{ margin: 0 }}>New creator sign-ups will appear here.</p>
+              </div>
+            ) : (
+              <div className={ui.tableWrap}>
+                <table className={ui.table}>
+                  <thead>
+                    <tr>
+                      <th>Creator</th>
+                      <th>Platform</th>
+                      <th />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data?.pending.items.map((creator) => (
+                      <tr key={creator.id}>
+                        <td className={ui.cellStrong}>@{creator.handle}</td>
+                        <td className={ui.cellMuted}>{humanise(creator.primaryPlatform)}</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate('/creators/registrations')}
+                          >
+                            Review →
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
         </div>
-      </div>
-    </div>
+      </AsyncBoundary>
+    </Page>
   );
 };
