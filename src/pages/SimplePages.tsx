@@ -10,12 +10,99 @@ import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Page, PageHeader, AsyncBoundary, EmptyState, ui } from '../components/common/PageShell';
 import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
+import { Input, Select, TextArea } from '../components/common/Input';
 import { Tag, humanise } from '../components/common/Tag';
 import { useToast } from '../components/common/Toast';
-import { createTemplate, fetchTemplates } from '../services/platformService';
+import { createTemplate, fetchTemplates, generateAiTemplate } from '../services/platformService';
 import { fetchSuppressions } from '../services/creatorService';
 import { ApiError } from '../services/apiClient';
+import type { OutreachType } from '../types';
+
+/**
+ * Requirement #32: drafts an outreach email with the LLM and saves it as a template.
+ *
+ * The result is always a draft in the library — it is never sent from here. If the provider is
+ * unavailable the backend returns its own written fallback rather than failing, so this button
+ * always produces something usable.
+ */
+const AiDraftPanel: React.FC<{ onCreated: () => void }> = ({ onCreated }) => {
+  const toast = useToast();
+  const [type, setType] = useState<OutreachType>('INITIAL_OUTREACH');
+  const [context, setContext] = useState('');
+  const [tone, setTone] = useState('');
+  const [result, setResult] = useState<{ subject: string; body: string } | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      generateAiTemplate({
+        type,
+        campaignContext: context || undefined,
+        tone: tone || undefined,
+      }),
+    onSuccess: (template) => {
+      setResult({ subject: template.subjectTemplate, body: template.bodyTemplate });
+      onCreated();
+      toast.success('Draft written and saved to the library');
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not draft the email'),
+  });
+
+  return (
+    <section className={ui.panel} style={{ marginBottom: 'var(--space-5)' }}>
+      <p className={ui.sectionLabel}>Draft with AI</p>
+      <p className={ui.cellMuted} style={{ marginTop: 0 }}>
+        Writes an outreach email in the brand&apos;s tone of voice, keeping the merge tokens
+        intact. It is saved as a draft template — nothing is sent.
+      </p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-3)' }}>
+        <Select label="Outreach type" value={type} onChange={(e) => setType(e.target.value as OutreachType)}>
+          <option value="INITIAL_OUTREACH">Initial outreach</option>
+          <option value="GIFTING_CONFIRMATION">Gifting confirmation</option>
+          <option value="FOLLOW_UP">Follow-up</option>
+          <option value="RE_ENGAGEMENT">Re-engagement</option>
+        </Select>
+        <Input
+          label="Tone of voice"
+          placeholder="Leave blank to use the brand's own"
+          value={tone}
+          onChange={(e) => setTone(e.target.value)}
+        />
+      </div>
+
+      <TextArea
+        label="Campaign context"
+        placeholder="Autumn handbag launch, seeding to UK fashion creators"
+        rows={2}
+        value={context}
+        onChange={(e) => setContext(e.target.value)}
+      />
+
+      <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+        {mutation.isPending ? 'Writing…' : 'Draft it'}
+      </Button>
+
+      {result && (
+        <div style={{ marginTop: 'var(--space-4)' }}>
+          <p className={ui.sectionLabel}>{result.subject}</p>
+          <div
+            style={{
+              whiteSpace: 'pre-wrap',
+              padding: 'var(--space-4)',
+              background: 'var(--surface-muted)',
+              border: 'var(--border-w) solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--fs-sm)',
+              lineHeight: 1.6,
+            }}
+          >
+            {result.body}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
 
 // ----------------------------------------------------------------- outreach
 
@@ -38,6 +125,10 @@ export const TemplatesPage: React.FC = () => {
   return (
     <Page>
       <PageHeader title="Outreach templates" subtitle="Reusable email templates for this brand" />
+
+      <AiDraftPanel
+        onCreated={() => queryClient.invalidateQueries({ queryKey: ['outreach-templates'] })}
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 'var(--space-5)' }}>
         <section className={ui.panel} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
