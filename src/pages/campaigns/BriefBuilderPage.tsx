@@ -16,7 +16,7 @@ import { API_BASE_URL, ApiError, tokenStore } from '../../services/apiClient';
 import type { ToneOfVoice } from '../../types';
 
 const DELIVERABLE_OPTIONS = ['Reel', 'Story', 'TikTok', 'YouTube', 'Blog', 'UGC'];
-const TONES: ToneOfVoice[] = ['FORMAL', 'CONVERSATIONAL', 'PLAYFUL', 'EDITORIAL', 'INSPIRATIONAL'];
+const TONES: ToneOfVoice[] = ['PROFESSIONAL', 'CASUAL', 'INSPIRATIONAL', 'WITTY', 'BOLD'];
 
 /** Requirements #1–#3: brief builder, PDF/share export, and the clause library. */
 export const BriefBuilderPage: React.FC = () => {

@@ -1,0 +1,137 @@
+/* Gifting logistics. Prototype tokens only. */
+
+.runCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+}
+
+.runTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.runName {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  line-height: 1.1;
+}
+
+/* The comp slip copy, shown as the thing that goes in the box. */
+.compSlip {
+  padding: var(--space-4);
+  background: var(--surface-lemon);
+  border: var(--border-w) dashed var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.compSlipEmpty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.runMeta {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Requirement #45: what actually happened, per creator, after a dispatch run. */
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  font-size: var(--fs-sm);
+}
+
+.outcomeCounts {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  font-weight: var(--weight-bold);
+}
+
+.warning {
+  color: var(--color-red);
+}
+
+.pickerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-2);
+  max-height: 320px;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
+
+.pickerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-w) solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  background: var(--color-white);
+}
+
+.pickerRowSelected {
+  border-color: var(--border-default);
+  background: var(--surface-lime);
+}
+
+.pickerBlocked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------- public form */
+
+.publicForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.consentRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  background: var(--surface-lime);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}

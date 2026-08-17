@@ -228,8 +228,12 @@ export interface SavedView {
 
 // ------------------------------------------------------------------ briefs
 
-export type ToneOfVoice = 'FORMAL' | 'CONVERSATIONAL' | 'PLAYFUL' | 'EDITORIAL' | 'INSPIRATIONAL';
-export type BriefStatus = 'DRAFT' | 'GENERATED' | 'APPROVED' | 'SHARED';
+// Must match com.generationb.briefs.ToneOfVoice exactly — the frontend previously listed
+// FORMAL/CONVERSATIONAL/PLAYFUL/EDITORIAL, none of which the backend accepts, so every
+// brief saved with a tone other than INSPIRATIONAL was rejected with a 400.
+export type ToneOfVoice = 'PROFESSIONAL' | 'CASUAL' | 'INSPIRATIONAL' | 'WITTY' | 'BOLD';
+// Must match com.generationb.briefs.BriefStatus — there is no APPROVED state on a brief.
+export type BriefStatus = 'DRAFT' | 'GENERATED' | 'SHARED';
 
 export interface Brief {
   id: string;
@@ -318,39 +322,116 @@ export interface CoverageItem {
   creatorHandle: string;
   platform: string;
   postType: string;
+  /** SHORT or LONG — derived from the post type on write (requirement #49). */
+  contentForm: string | null;
   url: string | null;
+  caption: string | null;
   views: number;
   likes: number;
   comments: number;
+  shares: number | null;
+  saves: number | null;
+  /** Null means "no data source supplies this", not zero. */
+  impressions: number | null;
   er: number;
   standardizedName: string;
   unsolicited: boolean;
+  source: string;
   postedAt: string;
 }
 
+export interface ClipResult {
+  captured: number;
+  duplicates: number;
+  items: CoverageItem[];
+}
+
 export interface DigestSettings {
-  id: string;
-  brandId: string;
   enabled: boolean;
   sendTime: string;
   recipientEmail: string | null;
+  clippingNamePattern: string;
+  includeUnsolicited: boolean;
+  lastSentAt: string | null;
 }
 
 // ----------------------------------------------------------------- gifting
 
+export type DispatchStatus =
+  | 'READY_TO_DISPATCH'
+  | 'DISPATCHED'
+  | 'DELIVERED'
+  | 'RETURNED'
+  | 'DECLINED';
+
 export interface GiftingRow {
   id: string;
+  giftingRunId: string | null;
   creatorId: string;
   handle: string;
-  addressStatus: 'CAPTURED' | 'PENDING';
-  gdprConsent: boolean;
+  creatorName: string | null;
   productName: string | null;
+  sku: string | null;
   courier: string | null;
   trackingNumber: string | null;
-  status: string;
+  status: DispatchStatus;
+  addressStatus: 'CAPTURED' | 'PENDING';
+  gdprConsent: boolean;
+  plannedDispatchDate: string | null;
+  contentDeadline: string | null;
   shippedAt: string | null;
   deliveredAt: string | null;
   returnReason: string | null;
+  reminderWeekSentAt: string | null;
+  reminder48hSentAt: string | null;
+}
+
+export interface GiftingRun {
+  id: string;
+  name: string;
+  campaignId: string | null;
+  productName: string | null;
+  mailerText: string | null;
+  compSlipStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+  approvedBy: string | null;
+  approvedAt: string | null;
+  dispatchCount: number;
+  createdAt: string;
+}
+
+export interface DispatchCreationResult {
+  created: number;
+  skippedNoAddress: number;
+  skippedExcluded: number;
+  skippedDuplicate: number;
+  warnings: string[];
+  dispatches: GiftingRow[];
+}
+
+export interface AddressCaptureResult {
+  emailsSent: number;
+  skipped: number;
+  warnings: string[];
+}
+
+export interface AddressFormView {
+  creatorName: string;
+  brandName: string;
+  alreadyCaptured: boolean;
+}
+
+export interface BrandOrder {
+  id: string;
+  campaignId: string | null;
+  giftingRunId: string | null;
+  brandContactEmail: string;
+  productName: string | null;
+  recipientCount: number;
+  notes: string | null;
+  status: 'REQUESTED' | 'CONFIRMED' | 'REJECTED';
+  confirmedAt: string | null;
+  rejectedReason: string | null;
+  createdAt: string;
 }
 
 // --------------------------------------------------------------- marketing
@@ -402,4 +483,178 @@ export interface CreatorRegistrationPayload {
   bio?: string;
   portfolio?: string;
   consentGiven: boolean;
+}
+
+// --------------------------------------------------------------- reporting
+
+export type ReportType = 'MONTHLY_SEEDING' | 'CAMPAIGN_WRAP' | 'MAILER_CONVERSION';
+// Must match com.generationb.reporting.ReportCadence and the reports.cadence check
+// constraint. CAMPAIGN is stored; "at campaign end" is the label, not the value.
+export type ReportCadence = 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'CAMPAIGN' | 'AD_HOC';
+export type ReportStatus =
+  | 'DRAFT'
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'SENT';
+
+/**
+ * Requirement #49. A null metric means "no data source supplies this" — never render it as 0,
+ * or the client reads an absence as a result. `notes` explains each gap in plain English.
+ */
+export interface ReportMetrics {
+  posts: number;
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number;
+  estimatedReach: number;
+  impressions: number | null;
+  averageEngagementRate: number | null;
+  engagementRateVsTarget: number | null;
+  followerGrowth: number | null;
+  followerGrowthPct: number | null;
+  shortFormPosts: number;
+  longFormPosts: number;
+  unsolicitedPosts: number;
+  qualityBands: Record<string, number>;
+  conversionRate: number | null;
+  reconciliation: Reconciliation | null;
+  creatorBreakdown: ReportCreatorRow[];
+  topPosts: ReportTopPost[];
+  notes: string[];
+}
+
+/** Requirement #15: who we sent to versus who actually posted. */
+export interface Reconciliation {
+  sentTo: number;
+  posted: number;
+  notPosted: number;
+  postRate: number | null;
+  outstanding: Array<{ creatorId: string; handle: string; insightStatus: string }>;
+}
+
+export interface ReportCreatorRow {
+  creatorId: string;
+  handle: string;
+  posts: number;
+  views: number;
+  likes: number;
+  comments: number;
+  engagementRate: number | null;
+  followerGrowth: number | null;
+  qualityBand: string | null;
+  insightStatus: string | null;
+}
+
+export interface ReportTopPost {
+  handle: string;
+  platform: string;
+  postType: string;
+  url: string | null;
+  views: number;
+  engagementRate: number | null;
+}
+
+export interface Report {
+  id: string;
+  brandId: string;
+  campaignId: string | null;
+  templateId: string | null;
+  name: string;
+  reportType: ReportType;
+  cadence: ReportCadence;
+  periodStart: string;
+  periodEnd: string;
+  status: ReportStatus;
+  metrics: ReportMetrics | null;
+  submittedBy: string | null;
+  submittedAt: string | null;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  sentAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  reportType: ReportType;
+  sections: string[];
+  includeAffiliate: boolean;
+  isDefault: boolean;
+}
+
+/** Requirement #52. */
+export interface InsightRequest {
+  id: string;
+  creatorId: string;
+  handle: string;
+  status: 'PENDING' | 'CHASED' | 'RECEIVED';
+  chaseCount: number;
+  lastChasedAt: string | null;
+}
+
+/** Requirement #55. */
+export interface KpiTarget {
+  campaignId: string;
+  minFollowers: number | null;
+  maxFollowers: number | null;
+  minEr: number | null;
+  minUkAudience: number | null;
+  targetReach: number | null;
+  preferredPlatform: string | null;
+  preferredNiche: string | null;
+}
+
+export interface KpiMatch {
+  creatorId: string;
+  handle: string;
+  score: number;
+  band: 'STRONG' | 'PARTIAL' | 'WEAK' | 'UNSET';
+  criteria: Array<{ label: string; met: boolean; detail: string }>;
+}
+
+// ------------------------------------------------------------- follow-ups
+
+/** Requirement #33. */
+export interface FollowUpSuggestion {
+  id: string;
+  recipientId: string;
+  creatorHandle: string;
+  creatorFirstName: string | null;
+  draftSubject: string | null;
+  draftBody: string | null;
+  status: 'SUGGESTED' | 'SENT' | 'DISMISSED';
+  createdAt: string;
+}
+
+// ------------------------------------------------------------------ admin
+
+/** Requirement #35. */
+export interface ManagedUser {
+  id: string;
+  name: string | null;
+  email: string;
+  username: string | null;
+  role: Role;
+  active: boolean;
+  locked: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+}
+
+/** Requirement #36. */
+export interface AuditEntry {
+  id: string;
+  entityType: string;
+  entityId: string;
+  action: string;
+  changedBy: string | null;
+  changedByName: string;
+  timestamp: string;
+  previousValue: string | null;
+  newValue: string | null;
 }

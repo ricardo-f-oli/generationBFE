@@ -258,6 +258,49 @@ export async function apiRequestPaged<T>(
   };
 }
 
+/**
+ * Downloads a binary export (PDF, Excel, PowerPoint) and hands it to the browser.
+ *
+ * These endpoints answer with the file itself rather than the JSON envelope, so they cannot go
+ * through `apiRequest`. The Authorization header rules out a plain `<a href>`, which is why the
+ * blob is fetched and then clicked through an object URL.
+ */
+export async function apiDownload(endpoint: string, fallbackName: string): Promise<void> {
+  let response: Response;
+
+  try {
+    response = await rawRequest(endpoint, {}, tokenStore.getAccess());
+  } catch {
+    throw new ApiError(0, 'NETWORK', 'Could not reach the server. Check your connection.');
+  }
+
+  if (response.status === 401) {
+    const newToken = await refreshAccessToken();
+    if (!newToken) {
+      endSession();
+      throw new ApiError(401, 'SESSION_EXPIRED', 'Your session has expired. Please sign in again.');
+    }
+    response = await rawRequest(endpoint, {}, newToken);
+  }
+
+  if (!response.ok) throw await toApiError(response);
+
+  // The filename the server chose, so an export is named the same however it was triggered.
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const match = /filename="?([^";]+)"?/.exec(disposition);
+  const filename = match ? match[1] : fallbackName;
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 /** Builds a query string, dropping undefined/empty values. */
 export function qs(params: Record<string, unknown>): string {
   const search = new URLSearchParams();

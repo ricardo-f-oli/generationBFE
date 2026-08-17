@@ -15,6 +15,8 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { RegisterPage } from './pages/public/RegisterPage';
 import { WaitlistLandingPage } from './pages/public/WaitlistLandingPage';
 import { UnsubscribePage } from './pages/public/UnsubscribePage';
+import { AddressCapturePage } from './pages/public/AddressCapturePage';
+import { BrandOrderConfirmPage } from './pages/public/BrandOrderConfirmPage';
 
 // Q-F18: everything behind the login is code-split.
 const DashboardPage = lazy(() =>
@@ -43,16 +45,32 @@ const OutreachPage = lazy(() =>
   import('./pages/OutreachPage').then((m) => ({ default: m.OutreachPage })));
 const WaitlistPage = lazy(() =>
   import('./pages/marketing/WaitlistPage').then((m) => ({ default: m.WaitlistPage })));
+const CoveragePage = lazy(() =>
+  import('./pages/coverage/CoveragePage').then((m) => ({ default: m.CoveragePage })));
+const CoverageDigestPage = lazy(() =>
+  import('./pages/coverage/CoverageDigestPage').then((m) => ({ default: m.CoverageDigestPage })));
+const GiftingRunsPage = lazy(() =>
+  import('./pages/gifting/GiftingRunsPage').then((m) => ({ default: m.GiftingRunsPage })));
+const DispatchesPage = lazy(() =>
+  import('./pages/gifting/DispatchesPage').then((m) => ({ default: m.DispatchesPage })));
+const ReportsPage = lazy(() =>
+  import('./pages/reporting/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const ReportDetailPage = lazy(() =>
+  import('./pages/reporting/ReportDetailPage').then((m) => ({ default: m.ReportDetailPage })));
+const InsightsPage = lazy(() =>
+  import('./pages/reporting/InsightsPage').then((m) => ({ default: m.InsightsPage })));
+const KpiPage = lazy(() =>
+  import('./pages/reporting/KpiPage').then((m) => ({ default: m.KpiPage })));
+const FollowUpsPage = lazy(() =>
+  import('./pages/outreach/FollowUpsPage').then((m) => ({ default: m.FollowUpsPage })));
+const UsersPage = lazy(() =>
+  import('./pages/settings/UsersPage').then((m) => ({ default: m.UsersPage })));
+const AuditPage = lazy(() =>
+  import('./pages/settings/AuditPage').then((m) => ({ default: m.AuditPage })));
+
 const Simple = {
-  Coverage: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.CoveragePage }))),
-  CoverageDigest: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.CoverageDigestPage }))),
-  Gifting: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.GiftingPage }))),
-  Dispatches: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.DispatchesPage }))),
   Templates: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.TemplatesPage }))),
-  Reporting: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.ReportingPage }))),
-  SettingsUsers: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.SettingsUsersPage }))),
   SettingsGdpr: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.SettingsGdprPage }))),
-  SettingsAudit: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.SettingsAuditPage }))),
   NotFound: lazy(() => import('./pages/SimplePages').then((m) => ({ default: m.NotFoundPage }))),
 };
 
@@ -99,6 +117,9 @@ export const App: React.FC = () => (
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/join" element={<WaitlistLandingPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                {/* Requirement #41 and #43: token-only, no login. */}
+                <Route path="/gifting/address/:token" element={<AddressCapturePage />} />
+                <Route path="/gifting/brand-order/:token" element={<BrandOrderConfirmPage />} />
 
                 {/* Authenticated */}
                 <Route element={<ProtectedLayout />}>
@@ -122,26 +143,31 @@ export const App: React.FC = () => (
                   {/* Outreach */}
                   <Route path="/outreach" element={<OutreachPage />} />
                   <Route path="/outreach/templates" element={<Simple.Templates />} />
+                  <Route path="/outreach/follow-ups" element={<FollowUpsPage />} />
 
                   {/* Coverage */}
-                  <Route path="/coverage" element={<Simple.Coverage />} />
-                  <Route path="/coverage/digest" element={<Simple.CoverageDigest />} />
+                  <Route path="/coverage" element={<CoveragePage />} />
+                  <Route path="/coverage/digest" element={<CoverageDigestPage />} />
 
                   {/* Gifting */}
-                  <Route path="/gifting" element={<Simple.Gifting />} />
-                  <Route path="/gifting/dispatches" element={<Simple.Dispatches />} />
+                  <Route path="/gifting" element={<GiftingRunsPage />} />
+                  <Route path="/gifting/dispatches" element={<DispatchesPage />} />
 
                   {/* Marketing */}
                   <Route path="/marketing/waitlist" element={<WaitlistPage />} />
 
-                  <Route path="/reporting" element={<Simple.Reporting />} />
+                  {/* Reporting */}
+                  <Route path="/reporting" element={<ReportsPage />} />
+                  <Route path="/reporting/insights" element={<InsightsPage />} />
+                  <Route path="/reporting/kpi" element={<KpiPage />} />
+                  <Route path="/reporting/:id" element={<ReportDetailPage />} />
 
                   {/* Settings — admin only (Q-F17) */}
                   <Route
                     path="/settings"
                     element={
                       <RequireRole roles={['ADMIN']}>
-                        <Simple.SettingsUsers />
+                        <UsersPage />
                       </RequireRole>
                     }
                   />
@@ -153,11 +179,12 @@ export const App: React.FC = () => (
                       </RequireRole>
                     }
                   />
+                  {/* Requirement #36: directors read the audit trail too. */}
                   <Route
                     path="/settings/audit"
                     element={
-                      <RequireRole roles={['ADMIN']}>
-                        <Simple.SettingsAudit />
+                      <RequireRole roles={['ADMIN', 'DIRECTOR']}>
+                        <AuditPage />
                       </RequireRole>
                     }
                   />

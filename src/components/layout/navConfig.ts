@@ -55,6 +55,7 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'Composer', path: '/outreach' },
       { label: 'Templates', path: '/outreach/templates' },
+      { label: 'Follow-ups', path: '/outreach/follow-ups' },
     ],
   },
   {
@@ -71,7 +72,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/gifting',
     icon: '◫',
     children: [
-      { label: 'Logistics', path: '/gifting' },
+      { label: 'Runs & comp slips', path: '/gifting' },
       { label: 'Dispatches', path: '/gifting/dispatches' },
     ],
   },
@@ -85,15 +86,21 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Reporting',
     path: '/reporting',
     icon: '▧',
+    children: [
+      { label: 'Reports', path: '/reporting' },
+      { label: 'Insight chasing', path: '/reporting/insights' },
+      { label: 'Campaign KPIs', path: '/reporting/kpi' },
+    ],
   },
   {
     label: 'Settings',
     path: '/settings',
     icon: '⚙',
-    roles: ['ADMIN'],
+    // Directors can read the audit trail (requirement #36); everything else here is admin-only.
+    roles: ['ADMIN', 'DIRECTOR'],
     children: [
-      { label: 'Users & roles', path: '/settings' },
-      { label: 'GDPR & data', path: '/settings/gdpr' },
+      { label: 'Users & roles', path: '/settings', roles: ['ADMIN'] },
+      { label: 'GDPR & data', path: '/settings/gdpr', roles: ['ADMIN'] },
       { label: 'Audit log', path: '/settings/audit' },
     ],
   },
