@@ -123,13 +123,76 @@
 
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
   gap: var(--space-4);
+}
+
+/* ------------------------------------------------- responsive layouts */
+
+/*
+ * Two-column page layouts that become one column on a narrow screen.
+ *
+ * These exist because the same layouts were written as inline `style={{ display: 'grid' }}`,
+ * and an inline style cannot carry a media query. Five screens scrolled sideways on a phone
+ * for exactly that reason.
+ *
+ * `min-width: 0` on the children is the other half of the fix and the less obvious one: a grid
+ * item defaults to `min-width: auto`, so it refuses to shrink below its content. A panel
+ * holding a 640px-wide table then forces the whole column open, and the page scrolls rather
+ * than the table. With `min-width: 0` the column shrinks and the table's own `overflow-x`
+ * takes over, which is what should have happened.
+ */
+.split,
+.splitWide,
+.splitNarrow {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.split > *,
+.splitWide > *,
+.splitNarrow > *,
+.pair > *,
+.autoFit > * {
+  min-width: 0;
+}
+
+.split { grid-template-columns: 1fr 1fr; }
+.splitWide { grid-template-columns: 1.5fr 1fr; }
+.splitNarrow { grid-template-columns: 1fr 1.4fr; }
+
+/* Side-by-side form fields. Stacks earlier than the page layouts: two inputs sharing 390px
+   leaves neither wide enough to read what you typed. */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.autoFit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 900px) {
+  .split,
+  .splitWide,
+  .splitNarrow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .pair {
+    grid-template-columns: 1fr;
+  }
 }
 
 .statGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  /* min() lets the track drop below 160px on a 390px screen instead of overflowing. */
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
   gap: var(--space-4);
 }
 
@@ -160,6 +223,15 @@
   line-height: var(--lh-tight);
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+}
+
+/* Sits under a stat that could only be partly measured, e.g. views on a page of Instagram
+   coverage. A number with no caveat reads as the whole truth. */
+.statNote {
+  font-size: var(--fs-xs);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  margin: var(--space-2) 0 0;
 }
 
 /* ---------------------------------------------------------------- forms */
@@ -294,5 +366,27 @@
   .pageHeader {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+/* ------------------------------------------------- touch targets (#38) */
+
+/*
+ * Standalone links get 24px of height on a touch screen — the WCAG 2.2 AA minimum (2.5.8).
+ *
+ * Not 44: a creator handle inside a table cell cannot be 44px tall without doubling the height
+ * of every row, and WCAG explicitly exempts links whose target is inline text. 24px with a
+ * little vertical padding is the standard that actually applies here, and it is enough to stop
+ * the mis-taps. Buttons — where the consequence of a mis-tap is an action, not a navigation —
+ * keep the stricter 44px rule.
+ */
+@media (pointer: coarse) {
+  .table a,
+  .cellLink,
+  .inlineLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding-block: var(--space-1);
   }
 }

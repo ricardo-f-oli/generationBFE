@@ -97,3 +97,27 @@
     transition: none;
   }
 }
+
+/* ------------------------------------------------- touch targets (#38) */
+
+/*
+ * On a touch screen every button gets at least 44px of height.
+ *
+ * 44 is Apple's and Google's figure, and it is about the width of an adult fingertip. Our
+ * sizes were 32 / 40 / 48, so small and medium buttons were under it — including "View" and
+ * "Remove" in table rows, where a mis-tap deletes something.
+ *
+ * Scoped to `pointer: coarse` so a mouse-driven desktop keeps the tighter, denser layout it
+ * was designed with. This is deliberately not a width rule: a full-width button on a phone is
+ * already wide, and forcing 44px of width on an icon button would break the header row.
+ */
+@media (pointer: coarse) {
+  .sm,
+  .md {
+    min-height: 44px;
+  }
+
+  .sm {
+    padding: var(--space-2) var(--space-4);
+  }
+}

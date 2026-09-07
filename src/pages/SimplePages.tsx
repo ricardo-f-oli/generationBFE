@@ -15,6 +15,7 @@ import { Tag, humanise } from '../components/common/Tag';
 import { useToast } from '../components/common/Toast';
 import { createTemplate, fetchTemplates, generateAiTemplate } from '../services/platformService';
 import { fetchSuppressions } from '../services/creatorService';
+import { fetchRetentionStatus, runRetention } from '../services/adminService';
 import { ApiError } from '../services/apiClient';
 import type { OutreachType } from '../types';
 
@@ -55,7 +56,7 @@ const AiDraftPanel: React.FC<{ onCreated: () => void }> = ({ onCreated }) => {
         intact. It is saved as a draft template — nothing is sent.
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-3)' }}>
+      <div className={ui.autoFit}>
         <Select label="Outreach type" value={type} onChange={(e) => setType(e.target.value as OutreachType)}>
           <option value="INITIAL_OUTREACH">Initial outreach</option>
           <option value="GIFTING_CONFIRMATION">Gifting confirmation</option>
@@ -130,7 +131,7 @@ export const TemplatesPage: React.FC = () => {
         onCreated={() => queryClient.invalidateQueries({ queryKey: ['outreach-templates'] })}
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 'var(--space-5)' }}>
+      <div className={ui.splitNarrow}>
         <section className={ui.panel} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <p className={ui.sectionLabel}>New template</p>
           <Input label="Name" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
@@ -191,6 +192,113 @@ export const TemplatesPage: React.FC = () => {
 
 // ------------------------------------------------------------------- GDPR
 
+/**
+ * Requirement #37: what the platform deletes, when, and when it last did it.
+ *
+ * The policy text comes from the server, which generates it from the sweepers themselves. That
+ * matters more than it looks: a retention policy written on a page and a retention job written in
+ * code drift apart within a quarter, and the page is the one people believe. Here there is only
+ * one source, so the screen cannot claim something the job does not do.
+ */
+const RetentionPanel: React.FC = () => {
+  const toast = useToast();
+  const queryClient = useQueryClient();
+
+  const status = useQuery({
+    queryKey: ['retention-status'],
+    queryFn: fetchRetentionStatus,
+    retry: false,
+  });
+
+  const preview = useMutation({
+    mutationFn: () => runRetention(true),
+    onSuccess: (outcomes) => {
+      const total = outcomes.reduce((sum, o) => sum + o.affected, 0);
+      toast.info(
+        total === 0
+          ? 'Nothing is currently due for deletion.'
+          : `${total} record(s) are due. Nothing has been deleted \u2014 this was a preview.`,
+      );
+      queryClient.invalidateQueries({ queryKey: ['retention-status'] });
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not run the preview'),
+  });
+
+  const formatDate = (value: string | null) =>
+    value ? new Date(value).toLocaleDateString('en-GB') : 'Never';
+
+  return (
+    <section className={ui.panel}>
+      <p className={ui.sectionLabel}>Retention</p>
+
+      <AsyncBoundary isLoading={status.isLoading} error={status.error}>
+        {!status.data ? null : (
+          <>
+            <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', marginTop: 0 }}>
+              {status.data.enabled
+                ? `Runs automatically at ${status.data.schedule}.`
+                : 'Automatic deletion is switched OFF on this environment. Previews still work.'}
+            </p>
+
+            <div className={ui.tableWrap}>
+              <table className={ui.table}>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Policy</th>
+                    <th>Last applied</th>
+                    <th className={ui.numeric}>Removed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {status.data.policies.map((policy) => (
+                    <tr key={policy.dataset}>
+                      <td className={ui.cellStrong}>{policy.dataset}</td>
+                      <td className={ui.cellMuted}>{policy.policy}</td>
+                      <td className={policy.lastRunAt ? undefined : ui.cellMuted}>
+                        {formatDate(policy.lastRunAt)}
+                        {policy.error && (
+                          <>
+                            {' '}
+                            <Tag tone="brand">Failed</Tag>
+                          </>
+                        )}
+                      </td>
+                      <td className={ui.numeric}>
+                        {policy.lastAffected === null ? '\u2014' : policy.lastAffected}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ marginTop: 'var(--space-4)' }}>
+              <Button
+                variant="secondary"
+                onClick={() => preview.mutate()}
+                disabled={preview.isPending}
+              >
+                {preview.isPending ? 'Checking\u2026' : 'Preview what is due'}
+              </Button>
+              <p
+                style={{
+                  fontSize: 'var(--fs-xs)',
+                  color: 'var(--text-muted)',
+                  margin: 'var(--space-2) 0 0',
+                }}
+              >
+                A preview counts what would be removed and changes nothing. Deletion happens on the
+                nightly schedule.
+              </p>
+            </div>
+          </>
+        )}
+      </AsyncBoundary>
+    </section>
+  );
+};
+
 export const SettingsGdprPage: React.FC = () => {
   const suppressions = useQuery({
     queryKey: ['suppressions'],
@@ -201,6 +309,8 @@ export const SettingsGdprPage: React.FC = () => {
   return (
     <Page>
       <PageHeader title="GDPR & data" subtitle="Consent, suppression and erasure" />
+
+      <RetentionPanel />
 
       <section className={ui.panel}>
         <p className={ui.sectionLabel}>What is live</p>

@@ -143,3 +143,26 @@
   margin-top: var(--space-5);
   text-align: center;
 }
+
+/* --------------------------------------------- touch targets (#38) */
+
+/* The two small controls on the sign-in form: the reveal toggle was 56x24 and the reset link
+   97x18. Both sit next to a password field, which is exactly where a mis-tap is most annoying
+   — you lose what you typed. The toggle is a button so it takes the 44px rule; the link is
+   inline text so it takes the 24px one. */
+@media (pointer: coarse) {
+  .toggle {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .inlineLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding-block: var(--space-1);
+  }
+}

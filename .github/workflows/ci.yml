@@ -1,0 +1,152 @@
+# Frontend CI.
+#
+# Three jobs, cheapest first, so an obvious break is reported in under a minute rather than
+# after a browser download:
+#
+#   build  — type-check, unit tests, production build
+#   e2e    — the full journeys, against a real backend and a real browser
+#
+# The e2e job builds the backend from its own repository, because an e2e run against a stubbed
+# API tests the stub. The two contract mismatches this project shipped — brief tone-of-voice and
+# report cadence — were both invisible to the frontend build and would have been caught here.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Type-check, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      # Type errors first: the fastest signal, and the one that catches a broken API contract.
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+      - name: Check the production API URL was baked in
+        # Vite inlines env at build time. This has broken once already — the deployed app called
+        # localhost because Vercel had no variable set — so it is asserted rather than assumed.
+        run: |
+          if grep -rq "generationb-api.onrender.com" dist/assets/*.js; then
+            echo "Production API URL is present"
+          else
+            echo "The production API URL is missing from the bundle."
+            echo "Check .env.production — the deployed app would call localhost."
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: frontend-dist
+          path: dist
+          retention-days: 5
+
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: generationb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Check out the frontend
+        uses: actions/checkout@v4
+
+      - name: Check out the backend
+        uses: actions/checkout@v4
+        with:
+          repository: ricardo-f-oli/generationB
+          path: backend
+          # A private backend repo needs a token with read access here.
+          token: ${{ secrets.BACKEND_REPO_TOKEN || github.token }}
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Start the backend
+        working-directory: backend
+        env:
+          SPRING_PROFILES_ACTIVE: local
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/generationb
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          CORS_ALLOWED_ORIGINS: http://localhost:5173
+        run: |
+          mvn -B -q -DskipTests package
+          nohup java -jar target/*.jar > backend.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fs http://localhost:8080/api/health/live > /dev/null && exit 0
+            sleep 2
+          done
+          echo "The backend never started:"; tail -60 backend.log; exit 1
+
+      - run: npm ci
+
+      - name: Install the browser
+        # Chromium only — the other engines double the download for no extra signal here.
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the journeys
+        env:
+          VITE_API_BASE_URL: http://localhost:8080/api
+        run: npm run test:e2e
+
+      - name: Upload the report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+      - name: Backend log on failure
+        if: failure()
+        run: tail -100 backend/backend.log

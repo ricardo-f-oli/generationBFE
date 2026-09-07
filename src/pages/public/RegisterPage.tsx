@@ -35,7 +35,28 @@ export const RegisterPage: React.FC = () => {
     portfolio: '',
   });
   const [tags, setTags] = useState<string[]>([]);
-  const [consent, setConsent] = useState(false);
+
+  /**
+   * Requirement #20: the five opt-in questions.
+   *
+   * One box covering storage, marketing, address sharing and content reuse is not specific
+   * consent to any of them under UK GDPR, and it is useless as evidence if a creator later says
+   * they never agreed to a brand seeing their rates. Only the first is required — without it
+   * there is nothing to store.
+   *
+   * Every answer is sent, including the refusals: "said no on 4 March" is a materially different
+   * record from "nothing on file", and only the first can be defended.
+   */
+  const [consents, setConsents] = useState({
+    consentGiven: false,
+    consentMarketingEmail: false,
+    consentGiftingAddress: false,
+    consentBrandSharing: false,
+    consentContentReuse: false,
+  });
+
+  const setConsent = (key: keyof typeof consents) => (checked: boolean) =>
+    setConsents((prev) => ({ ...prev, [key]: checked }));
 
   const set = (key: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -56,7 +77,7 @@ export const RegisterPage: React.FC = () => {
         tags,
         bio: form.bio || undefined,
         portfolio: form.portfolio || undefined,
-        consentGiven: consent,
+        ...consents,
       }),
     onError: (e) =>
       setError(
@@ -65,7 +86,8 @@ export const RegisterPage: React.FC = () => {
   });
 
   const firstName = form.fullName.trim().split(' ')[0] || 'there';
-  const canContinue = consent && form.fullName && form.email && form.instagram;
+  // Only the required question gates the form; the other four are genuinely optional.
+  const canContinue = consents.consentGiven && form.fullName && form.email && form.instagram;
 
   return (
     <div className={styles.landing}>
@@ -115,14 +137,13 @@ export const RegisterPage: React.FC = () => {
                   <Input label="Niche" value={form.niche} onChange={set('niche')} placeholder="Beauty" />
                   <Input label="Email address" type="email" value={form.email} onChange={set('email')} required />
 
-                  <label className={styles.consentRow}>
-                    <input
-                      type="checkbox"
-                      checked={consent}
-                      onChange={(e) => setConsent(e.target.checked)}
-                    />
-                    <span>
-                      I agree to B. The Agency storing my details in line with their{' '}
+                  <fieldset className={styles.consentGroup}>
+                    <legend className={styles.consentLegend}>
+                      What may we do with your details?
+                    </legend>
+                    <p className={styles.consentIntro}>
+                      Only the first is needed to join. The rest are yours to choose, and you can
+                      change any of them later by emailing us \u2014 see our{' '}
                       <button
                         type="button"
                         className={styles.backLink}
@@ -132,8 +153,65 @@ export const RegisterPage: React.FC = () => {
                         privacy policy
                       </button>
                       .
-                    </span>
-                  </label>
+                    </p>
+
+                    <label className={styles.consentRow}>
+                      <input
+                        type="checkbox"
+                        checked={consents.consentGiven}
+                        onChange={(e) => setConsent('consentGiven')(e.target.checked)}
+                      />
+                      <span>
+                        Keep my details on file so Generation B can consider me for campaigns.{' '}
+                        <em className={styles.consentRequired}>Required</em>
+                      </span>
+                    </label>
+
+                    <label className={styles.consentRow}>
+                      <input
+                        type="checkbox"
+                        checked={consents.consentMarketingEmail}
+                        onChange={(e) => setConsent('consentMarketingEmail')(e.target.checked)}
+                      />
+                      <span>Email me about paid campaigns and collaborations that suit my content.</span>
+                    </label>
+
+                    <label className={styles.consentRow}>
+                      <input
+                        type="checkbox"
+                        checked={consents.consentGiftingAddress}
+                        onChange={(e) => setConsent('consentGiftingAddress')(e.target.checked)}
+                      />
+                      <span>
+                        Send me products to try. I understand my address is shared with the
+                        fulfilment partner who posts the parcel.
+                      </span>
+                    </label>
+
+                    <label className={styles.consentRow}>
+                      <input
+                        type="checkbox"
+                        checked={consents.consentBrandSharing}
+                        onChange={(e) => setConsent('consentBrandSharing')(e.target.checked)}
+                      />
+                      <span>
+                        Share my profile, audience figures and rates with the client brands
+                        Generation B works with.
+                      </span>
+                    </label>
+
+                    <label className={styles.consentRow}>
+                      <input
+                        type="checkbox"
+                        checked={consents.consentContentReuse}
+                        onChange={(e) => setConsent('consentContentReuse')(e.target.checked)}
+                      />
+                      <span>
+                        Use posts I have published in campaign reports and in Generation B\u2019s
+                        own marketing.
+                      </span>
+                    </label>
+                  </fieldset>
 
                   <Button
                     variant="primary"

@@ -15,5 +15,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    // Vitest globs the whole project by default, which swept up the Playwright specs in e2e/
+    // and made a green unit run report a failed file. Playwright owns those; it has its own
+    // runner and its own config.
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 });

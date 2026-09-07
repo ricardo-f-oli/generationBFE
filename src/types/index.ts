@@ -62,6 +62,9 @@ export interface Creator {
   audienceAgeBand: string | null;
   audienceGenderSplit: string | null;
   qualityBand: string | null;
+  /** 'MODASH' when the four audience fields above were measured; null when typed by hand. */
+  insightsSource: string | null;
+  insightsRefreshedAt: string | null;
   optInStatus: string;
   tags: string[];
   brandEngagements: BrandEngagement[];
@@ -326,7 +329,11 @@ export interface CoverageItem {
   contentForm: string | null;
   url: string | null;
   caption: string | null;
-  views: number;
+  /**
+   * Null means the platform publishes no view count — Instagram never does, on any post type.
+   * It is not zero, and must never be rendered as one.
+   */
+  views: number | null;
   likes: number;
   comments: number;
   shares: number | null;
@@ -482,7 +489,15 @@ export interface CreatorRegistrationPayload {
   tags?: string[];
   bio?: string;
   portfolio?: string;
+
+  // Requirement #20: the five opt-in questions. Refusals are sent too — the server records
+  // "said no" as evidence, which is a different fact from having nothing on file.
+  /** Required. Keep my details on file. */
   consentGiven: boolean;
+  consentMarketingEmail: boolean;
+  consentGiftingAddress: boolean;
+  consentBrandSharing: boolean;
+  consentContentReuse: boolean;
 }
 
 // --------------------------------------------------------------- reporting
@@ -657,4 +672,77 @@ export interface AuditEntry {
   timestamp: string;
   previousValue: string | null;
   newValue: string | null;
+}
+
+// ------------------------------------------------- creator-data vendor (#23, #26)
+
+/** Whether the vendor is connected, and what is left to spend on it. */
+export interface DiscoveryStatus {
+  live: boolean;
+  credits?: number;
+  rawRequests?: number;
+  checkedAt?: string;
+  /** True when the balance could not be read — distinct from a balance of nothing. */
+  balanceUnavailable?: boolean;
+}
+
+/** A creator found at the vendor who may or may not already be in our database. */
+export interface DiscoveredCreator {
+  handle: string;
+  name: string;
+  platform: string;
+  followers: number;
+  er?: number;
+  location?: string;
+  picture?: string;
+  externalId?: string;
+  existingCreatorId?: string;
+  alreadyInDatabase?: boolean;
+  /** Median views per post, when the vendor's search index supplies one. */
+  medianViews?: number;
+  /** Competitor-mention results only: how many matching posts, and their total engagements. */
+  posts?: number;
+  engagements?: number;
+  mention?: string;
+  latestUrl?: string;
+}
+
+export interface EnrichmentResult {
+  creatorId: string;
+  handle: string;
+  refreshed: boolean;
+  /** Why it was skipped, when it was. Shown verbatim: "no data" is a real answer. */
+  reason: string;
+  refreshedAt: string | null;
+}
+
+// ------------------------------- sending outreach by hand (#28 interim)
+
+/**
+ * One creator's email, personalised and ready for a person to send themselves.
+ *
+ * The platform cannot send it: the domain publishes `v=spf1 -all`, so mail claiming to come from
+ * it is rejected outright rather than spam-foldered. Everything the platform is good at still
+ * happens — the draft, the merge tokens, the opt-out check — only the last hop moves.
+ */
+export interface ManualSendItem {
+  recipientId: string;
+  creatorHandle: string;
+  /** Null when the creator must not be contacted — the address is withheld, not just flagged. */
+  email: string | null;
+  subject: string;
+  body: string;
+  mailtoUrl: string | null;
+  /** Why they were skipped, shown verbatim. Null means they are sendable. */
+  skipReason: string | null;
+}
+
+export interface ManualSendBatch {
+  campaignId: string;
+  campaignName: string;
+  /** False while the sending domain is unauthenticated — which is why this screen exists. */
+  platformCanSend: boolean;
+  sendable: number;
+  skipped: number;
+  items: ManualSendItem[];
 }

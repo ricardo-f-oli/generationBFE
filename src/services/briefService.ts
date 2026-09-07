@@ -54,3 +54,37 @@ export function reorderClauses(orderedIds: string[]): Promise<void> {
 export function briefPdfUrl(id: string): string {
   return `/briefs/${id}/export/pdf`;
 }
+
+// ------------------------------------- clauses attached to a brief (#3)
+//
+// The library and the brief were separate until now: you could curate clauses and then had no
+// way to put any of them into the document a creator signs. These attach them, and the order
+// sent is the order they print in — which matters, because a liability clause after the
+// signature block reads differently from one before it.
+
+export function fetchBriefClauses(briefId: string): Promise<ContractClause[]> {
+  return apiRequest<ContractClause[]>(`/briefs/${briefId}/clauses`);
+}
+
+export function attachBriefClause(briefId: string, clauseId: string): Promise<ContractClause[]> {
+  return apiRequest<ContractClause[]>(`/briefs/${briefId}/clauses/${clauseId}`, {
+    method: 'POST',
+  });
+}
+
+export function detachBriefClause(briefId: string, clauseId: string): Promise<ContractClause[]> {
+  return apiRequest<ContractClause[]>(`/briefs/${briefId}/clauses/${clauseId}`, {
+    method: 'DELETE',
+  });
+}
+
+/** Replaces the whole set, in order. */
+export function setBriefClauses(
+  briefId: string,
+  clauseIds: string[],
+): Promise<ContractClause[]> {
+  return apiRequest<ContractClause[]>(`/briefs/${briefId}/clauses`, {
+    method: 'PUT',
+    body: clauseIds,
+  });
+}

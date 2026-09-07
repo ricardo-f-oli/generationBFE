@@ -69,6 +69,16 @@
   font-weight: var(--weight-bold);
   color: var(--text-primary);
   cursor: pointer;
+  text-decoration: none;
+}
+
+/* Requirement #38: 24px is the WCAG 2.2 minimum for a link target. */
+@media (pointer: coarse) {
+  .handleButton {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+  }
 }
 
 .handleButton:hover {
@@ -199,6 +209,106 @@
   font-size: var(--fs-sm);
   line-height: var(--lh-normal);
   white-space: pre-wrap;
+}
+
+/* ------------------------------------- creator-data vendor (#23, #26) */
+
+/* Sits under the audience figures. Says where they came from and offers to re-buy them, in
+   that order: the provenance is the part somebody needs before they quote a number. */
+.enrichBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: var(--border-w) solid var(--border-subtle, var(--border-default));
+}
+
+.enrichProvenance {
+  margin: 0;
+  flex: 1 1 16rem;
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------- discovery (requirement #23) */
+
+/* Two search modes that cost different amounts and answer different questions. Buttons rather
+   than a dropdown so both are visible before one is chosen. */
+.modeSwitch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.discoveryBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.discoveryQuery {
+  flex: 1 1 22rem;
+}
+
+/* The credit balance. Deliberately prominent: every search on this screen spends it. */
+.balance {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.balanceValue {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.balanceLow {
+  color: var(--color-red, #E00008);
+}
+
+.discoveryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.discoveryCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-white);
+  border: var(--border-w) solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.discoveryHandle {
+  margin: 0;
+  font-weight: var(--weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.discoveryMeta {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.discoveryFoot {
+  margin-top: auto;
+  padding-top: var(--space-2);
 }
 
 @media (max-width: 1000px) {

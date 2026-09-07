@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Page, PageHeader, AsyncBoundary, EmptyState, ui } from '../../components/common/PageShell';
 import { Button } from '../../components/common/Button';
@@ -204,13 +204,18 @@ export const CreatorsPage: React.FC = () => {
                     <div className={styles.cardTop}>
                       <Avatar name={creator.handle} size={44} />
                       <div className={styles.cardIdentity}>
-                        <button
-                          type="button"
+                        {/*
+                          A Link, not a button with a navigate() handler. It goes somewhere, so
+                          it should behave like it does: middle-click and cmd-click open a new
+                          tab, the status bar previews the URL, and assistive technology
+                          announces a link rather than an action.
+                        */}
+                        <Link
+                          to={`/creators/${creator.id}`}
                           className={styles.handleButton}
-                          onClick={() => navigate(`/creators/${creator.id}`)}
                         >
                           @{creator.handle}
-                        </button>
+                        </Link>
                         <span className={styles.cardMeta}>
                           {creator.location ?? 'Location unknown'}
                           {creator.niche ? ` · ${creator.niche}` : ''}

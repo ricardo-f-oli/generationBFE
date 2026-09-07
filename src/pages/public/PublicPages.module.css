@@ -145,3 +145,44 @@
     padding: var(--space-5) var(--space-4);
   }
 }
+
+/* -------------------------------- the five opt-in questions (req #20) */
+
+/* A fieldset rather than five loose checkboxes: they are one question with five parts, and a
+   screen reader should announce them that way. */
+.consentGroup {
+  border: var(--border-w, 1px) solid var(--border-subtle, #D8D8D8);
+  border-radius: var(--radius-md, 4px);
+  padding: var(--space-4, 1rem);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+}
+
+.consentLegend {
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--weight-bold, 700);
+  letter-spacing: var(--tracking-wide, 0.09em);
+  text-transform: uppercase;
+  color: var(--text-muted, #6B6B6B);
+  padding: 0 var(--space-2, 0.5rem);
+}
+
+.consentIntro {
+  margin: 0;
+  font-size: var(--fs-xs, 0.75rem);
+  line-height: var(--lh-normal, 1.5);
+  color: var(--text-muted, #6B6B6B);
+}
+
+/* Marks the one box that is not optional, so nobody has to guess which is which. */
+.consentRequired {
+  font-style: normal;
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--weight-bold, 700);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide, 0.09em);
+  color: var(--text-brand, #E00008);
+  white-space: nowrap;
+}

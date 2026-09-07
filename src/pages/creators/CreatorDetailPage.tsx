@@ -14,9 +14,11 @@ import {
   anonymiseCreator,
   assignTag,
   deleteNote,
+  enrichCreator,
   fetchAttributeDefinitions,
   fetchAttributeValues,
   fetchCreator,
+  fetchDiscoveryStatus,
   fetchNotes,
   fetchTags,
   setAttributeValue,
@@ -90,6 +92,33 @@ export const CreatorDetailPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['creator', id] });
       toast.success('Creator added to the suppression list');
     },
+  });
+
+  /**
+   * Requirement #26. The balance is read first so the button can say why it is unavailable —
+   * an "Enrich" that fails on an empty account is worse than one that is visibly off.
+   */
+  const discovery = useQuery({
+    queryKey: ['discovery-status'],
+    queryFn: fetchDiscoveryStatus,
+    staleTime: 60_000,
+  });
+
+  const enrichMutation = useMutation({
+    // `force` re-buys a report that is still inside the freshness window, so it is only ever
+    // sent when someone has been told the figures are current and asked for them anyway.
+    mutationFn: (force: boolean) => enrichCreator(id, force),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['creator', id] });
+      queryClient.invalidateQueries({ queryKey: ['discovery-status'] });
+      // A skip is not a failure and not a success. Say which, in the vendor's own words.
+      if (result.refreshed) {
+        toast.success('Audience demographics updated');
+      } else {
+        toast.info(result.reason);
+      }
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not reach the provider'),
   });
 
   const anonymiseMutation = useMutation({
@@ -275,9 +304,17 @@ export const CreatorDetailPage: React.FC = () => {
                     <dt>YouTube</dt>
                     <dd>{creator.data.youtubeHandle ?? '—'}</dd>
                     <dt>UK audience</dt>
-                    <dd>{creator.data.ukAudiencePct ? `${creator.data.ukAudiencePct}%` : '—'}</dd>
+                    <dd>
+                      {creator.data.ukAudiencePct !== null
+                        ? `${creator.data.ukAudiencePct}%`
+                        : 'Not known'}
+                    </dd>
                     <dt>Age band</dt>
-                    <dd>{creator.data.audienceAgeBand ?? '—'}</dd>
+                    <dd>{creator.data.audienceAgeBand ?? 'Not known'}</dd>
+                    <dt>Gender split</dt>
+                    <dd>{creator.data.audienceGenderSplit ?? 'Not known'}</dd>
+                    <dt>Audience quality</dt>
+                    <dd>{creator.data.qualityBand ? humanise(creator.data.qualityBand) : 'Not known'}</dd>
                     <dt>Opt-in</dt>
                     <dd>
                       <Tag tone={statusTone(creator.data.optInStatus)}>
@@ -287,6 +324,39 @@ export const CreatorDetailPage: React.FC = () => {
                     <dt>Last contact</dt>
                     <dd>{creator.data.lastContact ?? '—'}</dd>
                   </dl>
+
+                  {/*
+                    Requirement #26. The four audience figures above are either measured or
+                    guessed, and they look identical on the page, so the source is stated.
+                  */}
+                  <div className={styles.enrichBar}>
+                    <p className={styles.enrichProvenance}>
+                      {creator.data.insightsSource === 'MODASH' ? (
+                        <>
+                          Audience data from Modash
+                          {creator.data.insightsRefreshedAt &&
+                            `, ${new Date(creator.data.insightsRefreshedAt).toLocaleDateString('en-GB')}`}
+                        </>
+                      ) : (
+                        'Audience data has not been measured — entered by hand or left blank.'
+                      )}
+                    </p>
+                    {discovery.data?.live ? (
+                      <Button
+                        variant="secondary"
+                        onClick={() => enrichMutation.mutate(creator.data.insightsSource === 'MODASH')}
+                        disabled={enrichMutation.isPending}
+                      >
+                        {enrichMutation.isPending
+                          ? 'Fetching…'
+                          : creator.data.insightsSource === 'MODASH'
+                            ? 'Refresh (1 credit)'
+                            : 'Fetch demographics (1 credit)'}
+                      </Button>
+                    ) : (
+                      <span className={ui.cellMuted}>Creator-data provider not connected.</span>
+                    )}
+                  </div>
                 </section>
 
                 {/* Requirement #19 — cross-brand engagement history */}

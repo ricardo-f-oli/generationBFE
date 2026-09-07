@@ -2,6 +2,9 @@ import { apiRequest, apiRequestPaged, qs } from './apiClient';
 import type {
   AttributeDefinition,
   Creator,
+  DiscoveredCreator,
+  DiscoveryStatus,
+  EnrichmentResult,
   CreatorFilters,
   CreatorNote,
   CreatorRegistrationPayload,
@@ -188,4 +191,73 @@ export function unsubscribe(email: string, reason?: string) {
     body: { email, reason },
     anonymous: true,
   });
+}
+
+// ------------------------------------------- creator-data vendor (#23, #26)
+//
+// Everything here except `fetchDiscoveryStatus` and `lookupHandles` costs money per call, which
+// is why none of it runs on page load. A screen shows the balance first and asks second.
+
+/** Whether the vendor is connected and what the account has left. Free to call. */
+export function fetchDiscoveryStatus(): Promise<DiscoveryStatus> {
+  return apiRequest<DiscoveryStatus>('/creators/discovery/status');
+}
+
+/**
+ * Requirement #23: search the vendor's index with a sentence rather than keywords.
+ * Costs roughly 0.025 credits per profile returned.
+ */
+export function discoverCreators(input: {
+  query: string;
+  platform?: string;
+  niche?: string;
+}): Promise<DiscoveredCreator[]> {
+  return apiRequest<DiscoveredCreator[]>('/creators/discovery/search', {
+    method: 'POST',
+    body: input,
+  });
+}
+
+/**
+ * Requirement #25: which creators are posting about a competitor.
+ *
+ * Read-only — nothing found here is written to the coverage log. A competitor's posts are a
+ * signal about who to approach, not coverage the client earned.
+ */
+export function fetchCompetitorMentions(
+  term: string,
+  limit = 30,
+): Promise<DiscoveredCreator[]> {
+  return apiRequest<DiscoveredCreator[]>(
+    `/creators/discovery/competitor-mentions${qs({ term, limit })}`,
+  );
+}
+
+/** Free handle lookup — confirms an account exists before anything spends a credit on it. */
+export function lookupHandles(
+  query: string,
+  platform = 'instagram',
+  limit = 10,
+): Promise<DiscoveredCreator[]> {
+  return apiRequest<DiscoveredCreator[]>(
+    `/creators/discovery/lookup${qs({ query, platform, limit })}`,
+  );
+}
+
+/**
+ * Requirement #26: pull one creator's audience demographics. Costs a credit unless what is on
+ * file is still fresh, so `force` is an explicit choice rather than the default.
+ */
+export function enrichCreator(id: string, force = false): Promise<EnrichmentResult> {
+  return apiRequest<EnrichmentResult>(`/creators/${id}/enrich${qs({ force })}`, {
+    method: 'POST',
+  });
+}
+
+/** Refreshes the creators whose demographics are most out of date. One credit each. */
+export function refreshStalestCreators(limit = 10, force = false): Promise<EnrichmentResult[]> {
+  return apiRequest<EnrichmentResult[]>(
+    `/creators/discovery/refresh${qs({ limit, force })}`,
+    { method: 'POST' },
+  );
 }

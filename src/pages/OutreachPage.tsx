@@ -10,11 +10,14 @@ import {
   createOutreachDraft,
   fetchRecipients,
   fetchTemplates,
+  markSentManually,
+  prepareManualSend,
   previewResolved,
   sendOutreachNow,
 } from '../services/platformService';
 import { searchCreators } from '../services/creatorService';
 import { ApiError } from '../services/apiClient';
+import type { ManualSendBatch, ManualSendItem } from '../types';
 
 const MERGE_TOKENS = ['{first_name}', '{handle}', '{brand}', '{last_worked_with}', '{product}'];
 
@@ -80,6 +83,47 @@ export const OutreachPage: React.FC = () => {
     mutationFn: () => previewResolved(campaignId!, recipients.data![0].id),
   });
 
+  /**
+   * Requirement #28, interim.
+   *
+   * The sending domain is not authenticated yet — it publishes `v=spf1 -all`, so mail claiming
+   * to come from it is rejected outright rather than landing in spam. Until that is sorted, the
+   * platform prepares the emails and the user sends them from their own mailbox.
+   *
+   * Everything the platform is good at still happens: the draft, the merge tokens resolved
+   * against real data, the opt-out enforcement. Only the last hop moves.
+   */
+  const [manualBatch, setManualBatch] = useState<ManualSendBatch | null>(null);
+  const [sentIds, setSentIds] = useState<string[]>([]);
+
+  const manualMutation = useMutation({
+    mutationFn: () => prepareManualSend(campaignId!),
+    onSuccess: (batch) => {
+      setManualBatch(batch);
+      setSentIds([]);
+    },
+    onError: (e) =>
+      toast.error(e instanceof ApiError ? e.message : 'Could not prepare the emails'),
+  });
+
+  const confirmSentMutation = useMutation({
+    mutationFn: () => markSentManually(campaignId!, sentIds),
+    onSuccess: (result) => {
+      toast.success(`${result.marked} marked as sent`);
+      setManualBatch(null);
+      setSentIds([]);
+      recipients.refetch();
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not update statuses'),
+  });
+
+  const copyEmail = async (item: ManualSendItem) => {
+    await navigator.clipboard.writeText(
+      `To: ${item.email ?? ''}\nSubject: ${item.subject}\n\n${item.body}`,
+    );
+    toast.success('Copied — paste it into your mail client');
+  };
+
   const insertToken = (token: string) => setBody((prev) => `${prev} ${token}`);
 
   return (
@@ -96,18 +140,144 @@ export const OutreachPage: React.FC = () => {
             >
               {draftMutation.isPending ? 'Saving…' : 'Save draft'}
             </Button>
+            {/*
+              Preparing the emails for the user is the primary action while the domain is
+              unauthenticated. "Send now" stays available but is secondary, because today it
+              produces bounces rather than delivery.
+            */}
             <Button
               variant="primary"
+              disabled={!campaignId || manualMutation.isPending}
+              onClick={() => manualMutation.mutate()}
+            >
+              {manualMutation.isPending ? 'Preparing…' : 'Prepare emails to send'}
+            </Button>
+            <Button
+              variant="ghost"
               disabled={!campaignId || sendMutation.isPending}
               onClick={() => sendMutation.mutate()}
             >
-              {sendMutation.isPending ? 'Sending…' : 'Send now'}
+              {sendMutation.isPending ? 'Sending…' : 'Send via platform'}
             </Button>
           </>
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 'var(--space-5)' }}>
+      {manualBatch && (
+        <section className={ui.panel} style={{ marginBottom: 'var(--space-5)' }}>
+          <p className={ui.sectionLabel}>Send these yourself</p>
+
+          <p
+            style={{
+              fontSize: 'var(--fs-sm)',
+              color: 'var(--text-muted)',
+              margin: '0 0 var(--space-4)',
+              maxWidth: '68ch',
+            }}
+          >
+            {manualBatch.platformCanSend
+              ? 'Each email below is personalised and ready. Send from your own mailbox, then tick off what went.'
+              : 'The sending domain is not authenticated yet, so mail sent by the platform would be rejected rather than delivered. Each email below is written and personalised — send them from your own address, then tick off what went.'}
+            {manualBatch.skipped > 0
+              && ` ${manualBatch.skipped} creator(s) are excluded and their addresses withheld.`}
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+            {manualBatch.items.map((item: ManualSendItem) => (
+              <div
+                key={item.recipientId}
+                style={{
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: 'var(--space-3)',
+                  opacity: item.skipReason ? 0.6 : 1,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    gap: 'var(--space-3)',
+                  }}
+                >
+                  {!item.skipReason && (
+                    <input
+                      type="checkbox"
+                      aria-label={`Mark ${item.creatorHandle} as sent`}
+                      checked={sentIds.includes(item.recipientId)}
+                      onChange={(e) =>
+                        setSentIds((prev) =>
+                          e.target.checked
+                            ? [...prev, item.recipientId]
+                            : prev.filter((id) => id !== item.recipientId),
+                        )
+                      }
+                    />
+                  )}
+                  <strong style={{ fontSize: 'var(--fs-sm)' }}>@{item.creatorHandle}</strong>
+                  <span className={ui.cellMuted} style={{ fontSize: 'var(--fs-xs)', flex: 1 }}>
+                    {item.skipReason ?? item.email}
+                  </span>
+
+                  {!item.skipReason && (
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => copyEmail(item)}>
+                        Copy
+                      </Button>
+                      {item.mailtoUrl && (
+                        <a
+                          className={ui.inlineLink}
+                          href={item.mailtoUrl}
+                          style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--weight-bold)' }}
+                        >
+                          Open in mail app
+                        </a>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {!item.skipReason && (
+                  <details style={{ marginTop: 'var(--space-2)' }}>
+                    <summary style={{ fontSize: 'var(--fs-xs)', cursor: 'pointer' }}>
+                      {item.subject}
+                    </summary>
+                    <pre
+                      style={{
+                        whiteSpace: 'pre-wrap',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'var(--fs-sm)',
+                        margin: 'var(--space-2) 0 0',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      {item.body}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className={ui.enrichBar ?? ''} style={{ marginTop: 'var(--space-4)' }}>
+            <Button
+              variant="primary"
+              disabled={sentIds.length === 0 || confirmSentMutation.isPending}
+              onClick={() => confirmSentMutation.mutate()}
+            >
+              {confirmSentMutation.isPending
+                ? 'Updating…'
+                : `Mark ${sentIds.length} as sent`}
+            </Button>
+            <Button variant="ghost" onClick={() => setManualBatch(null)}>
+              Close
+            </Button>
+          </div>
+        </section>
+      )}
+
+      <div className={ui.splitWide}>
         <section className={ui.panel} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <Select
             label="Start from a template"

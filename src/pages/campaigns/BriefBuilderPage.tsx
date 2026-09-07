@@ -8,6 +8,9 @@ import { useToast } from '../../components/common/Toast';
 import {
   createBrief,
   fetchBriefs,
+  attachBriefClause,
+  detachBriefClause,
+  fetchBriefClauses,
   fetchClauses,
   fetchShareLink,
   generateBrief,
@@ -39,6 +42,35 @@ export const BriefBuilderPage: React.FC = () => {
 
   const briefs = useQuery({ queryKey: ['briefs'], queryFn: () => fetchBriefs(0, 10) });
   const clauses = useQuery({ queryKey: ['clauses'], queryFn: fetchClauses });
+
+  /**
+   * Requirement #3: which brief's terms are being edited.
+   *
+   * The clause panel is per brief rather than global, because "which clauses apply" is a
+   * property of the deal, not of the library. Defaults to the brief just saved so the common
+   * path — write the brief, then choose its terms — needs no extra click.
+   */
+  const [clauseBriefId, setClauseBriefId] = useState<string | null>(null);
+  const activeBriefId = clauseBriefId ?? currentBriefId;
+
+  const briefClauses = useQuery({
+    queryKey: ['brief-clauses', activeBriefId],
+    queryFn: () => fetchBriefClauses(activeBriefId as string),
+    enabled: Boolean(activeBriefId),
+  });
+
+  const attachedIds = new Set((briefClauses.data ?? []).map((c) => c.id));
+
+  const toggleClause = useMutation({
+    mutationFn: ({ clauseId, attached }: { clauseId: string; attached: boolean }) =>
+      attached
+        ? detachBriefClause(activeBriefId as string, clauseId)
+        : attachBriefClause(activeBriefId as string, clauseId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['brief-clauses', activeBriefId] }),
+    onError: (e) =>
+      toast.error(e instanceof ApiError ? e.message : 'Could not update the terms'),
+  });
 
   const set = (key: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -112,7 +144,7 @@ export const BriefBuilderPage: React.FC = () => {
     <Page>
       <PageHeader title="Brief builder" subtitle="Draft a creator brief and share it with the client" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 'var(--space-5)' }}>
+      <div className={ui.splitWide}>
         <section className={ui.panel} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <Input label="Campaign name" value={form.campaignName} onChange={set('campaignName')} required />
           <TextArea label="Campaign goal" value={form.campaignGoal} onChange={set('campaignGoal')} rows={3} />
@@ -134,12 +166,12 @@ export const BriefBuilderPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
+          <div className={ui.pair}>
             <Input label="Budget min (£)" type="number" value={form.budgetMin} onChange={set('budgetMin')} />
             <Input label="Budget max (£)" type="number" value={form.budgetMax} onChange={set('budgetMax')} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
+          <div className={ui.pair}>
             <Input label="Start" type="date" value={form.timelineStart} onChange={set('timelineStart')} />
             <Input label="End" type="date" value={form.timelineEnd} onChange={set('timelineEnd')} />
           </div>
@@ -176,21 +208,79 @@ export const BriefBuilderPage: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
           <section className={ui.panel}>
             <p className={ui.sectionLabel}>Contract clauses</p>
-            <AsyncBoundary isLoading={clauses.isLoading} error={clauses.error}>
-              {clauses.data?.length === 0 ? (
-                <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', margin: 0 }}>
-                  No clauses defined yet.
-                </p>
-              ) : (
-                <ul style={{ margin: 0, paddingLeft: 'var(--space-4)', fontSize: 'var(--fs-sm)' }}>
-                  {clauses.data?.map((clause) => (
-                    <li key={clause.id} style={{ marginBottom: 'var(--space-2)' }}>
-                      <strong>{humanise(clause.clauseType)}</strong>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </AsyncBoundary>
+
+            {!activeBriefId ? (
+              <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', margin: 0 }}>
+                Save a brief, or pick one below, to choose which terms it carries.
+              </p>
+            ) : (
+              <AsyncBoundary isLoading={clauses.isLoading} error={clauses.error}>
+                {clauses.data?.length === 0 ? (
+                  <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', margin: 0 }}>
+                    No clauses defined yet. Add them in the clause library.
+                  </p>
+                ) : (
+                  <>
+                    <p
+                      style={{
+                        fontSize: 'var(--fs-xs)',
+                        color: 'var(--text-muted)',
+                        margin: '0 0 var(--space-3)',
+                      }}
+                    >
+                      Ticked clauses print as the Terms section of this brief's PDF.
+                    </p>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 'var(--space-2)',
+                      }}
+                    >
+                      {clauses.data?.map((clause) => {
+                        const attached = attachedIds.has(clause.id);
+                        return (
+                          <label
+                            key={clause.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: 'var(--space-3)',
+                              fontSize: 'var(--fs-sm)',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={attached}
+                              disabled={toggleClause.isPending}
+                              onChange={() =>
+                                toggleClause.mutate({ clauseId: clause.id, attached })
+                              }
+                            />
+                            <span>
+                              <strong>{humanise(clause.clauseType)}</strong>
+                              <span
+                                style={{
+                                  display: 'block',
+                                  color: 'var(--text-muted)',
+                                  fontSize: 'var(--fs-xs)',
+                                  marginTop: 2,
+                                }}
+                              >
+                                {clause.content.length > 90
+                                  ? `${clause.content.slice(0, 90)}\u2026`
+                                  : clause.content}
+                              </span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </AsyncBoundary>
+            )}
           </section>
 
           <section className={ui.panel}>
@@ -220,6 +310,13 @@ export const BriefBuilderPage: React.FC = () => {
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => shareMutation.mutate(brief.id)}>
                           Copy share link
+                        </Button>
+                        <Button
+                          variant={activeBriefId === brief.id ? 'primary' : 'ghost'}
+                          size="sm"
+                          onClick={() => setClauseBriefId(brief.id)}
+                        >
+                          Terms
                         </Button>
                       </div>
                     </div>

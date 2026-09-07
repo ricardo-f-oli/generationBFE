@@ -60,3 +60,43 @@ export function fetchAuditLog(filters: AuditFilters = {}): Promise<Paged<AuditEn
 export function fetchAuditEntityTypes(): Promise<string[]> {
   return apiRequest<string[]>('/settings/audit/entity-types');
 }
+
+// ------------------------------------------------- retention (req #37)
+
+/** One dataset's rule, plus what the last real pass of it did. */
+export interface RetentionPolicy {
+  dataset: string;
+  /** The rule in a sentence. Generated from the sweeper, so it is necessarily what the code does. */
+  policy: string;
+  lastAffected: number | null;
+  lastRunAt: string | null;
+  /** Age of the oldest record still held. A value that stops moving means a stuck sweeper. */
+  oldestRemaining: string | null;
+  error: string | null;
+}
+
+export interface RetentionStatus {
+  enabled: boolean;
+  schedule: string;
+  policies: RetentionPolicy[];
+}
+
+export interface RetentionOutcome {
+  dataset: string;
+  policy: string;
+  affected: number;
+}
+
+export function fetchRetentionStatus(): Promise<RetentionStatus> {
+  return apiRequest<RetentionStatus>('/settings/retention');
+}
+
+/**
+ * Runs the policies now. `dryRun` defaults to true on the server as well — nobody should be one
+ * mis-click from deleting a year of addresses on a screen whose job is showing them the rules.
+ */
+export function runRetention(dryRun = true): Promise<RetentionOutcome[]> {
+  return apiRequest<RetentionOutcome[]>(`/settings/retention/run${qs({ dryRun })}`, {
+    method: 'POST',
+  });
+}

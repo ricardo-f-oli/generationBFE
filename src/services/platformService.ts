@@ -12,6 +12,7 @@ import type {
   OutreachRecipient,
   OutreachTemplate,
   OutreachType,
+  ManualSendBatch,
   ResolvedPreview,
 } from '../types';
 
@@ -119,5 +120,26 @@ export function generateAiTemplate(input: {
   return apiRequest<OutreachTemplate>('/outreach/templates/ai-generate', {
     method: 'POST',
     body: input,
+  });
+}
+
+// ------------------------------- sending outreach by hand (#28 interim)
+
+/**
+ * The campaign's emails, personalised and ready to send from your own mailbox.
+ * Marks nothing as sent — only the person who presses send in their mail client knows that.
+ */
+export function prepareManualSend(campaignId: string): Promise<ManualSendBatch> {
+  return apiRequest<ManualSendBatch>(`/outreach/campaigns/${campaignId}/manual-send`);
+}
+
+/** Confirms which ones actually went. Writes send history, so duplicates and reporting still see them. */
+export function markSentManually(
+  campaignId: string,
+  recipientIds: string[],
+): Promise<{ marked: number }> {
+  return apiRequest<{ marked: number }>(`/outreach/campaigns/${campaignId}/mark-sent`, {
+    method: 'POST',
+    body: recipientIds,
   });
 }

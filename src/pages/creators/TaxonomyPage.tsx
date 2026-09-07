@@ -28,7 +28,15 @@ export const TaxonomyPage: React.FC = () => {
 
   const [tagName, setTagName] = useState('');
   const [tagCategory, setTagCategory] = useState('AESTHETIC');
-  const [attr, setAttr] = useState({ key: '', label: '', type: 'STRING' });
+  /**
+   * Requirement #16: the type is enforced on the server now, so the form has to collect what
+   * enforcement needs — including the option list, without which a Select attribute is
+   * rejected as a configuration error rather than saved and left broken.
+   */
+  const [attr, setAttr] = useState({ key: '', label: '', type: 'STRING', options: '' });
+
+  /** The two types that are meaningless without a list to choose from. */
+  const needsOptions = attr.type === 'SELECT' || attr.type === 'MULTI_SELECT';
 
   const addTag = useMutation({
     mutationFn: () => createTag(tagName, tagCategory),
@@ -52,9 +60,16 @@ export const TaxonomyPage: React.FC = () => {
 
   const addAttribute = useMutation({
     mutationFn: () =>
-      createAttributeDefinition({ key: attr.key, label: attr.label, type: attr.type }),
+      createAttributeDefinition({
+        key: attr.key,
+        label: attr.label,
+        type: attr.type,
+        options: needsOptions
+          ? attr.options.split(',').map((o) => o.trim()).filter(Boolean)
+          : undefined,
+      }),
     onSuccess: () => {
-      setAttr({ key: '', label: '', type: 'STRING' });
+      setAttr({ key: '', label: '', type: 'STRING', options: '' });
       queryClient.invalidateQueries({ queryKey: ['attribute-defs'] });
       toast.success('Attribute added');
     },
@@ -76,7 +91,7 @@ export const TaxonomyPage: React.FC = () => {
         subtitle="Define what your team tracks against every creator on this brand"
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-5)' }}>
+      <div className={ui.split}>
         {/* ------------------------------------------------ tag library */}
         <section className={ui.panel}>
           <p className={ui.sectionLabel}>Aesthetic &amp; content-style tags</p>
@@ -178,10 +193,27 @@ export const TaxonomyPage: React.FC = () => {
                 <option value="NUMBER">Number</option>
                 <option value="DATE">Date</option>
                 <option value="BOOLEAN">Yes / no</option>
+                <option value="SELECT">Pick one</option>
+                <option value="MULTI_SELECT">Pick several</option>
+                <option value="URL">Web address</option>
+                <option value="EMAIL">Email</option>
               </Select>
+              {needsOptions && (
+                <Input
+                  label="Options"
+                  value={attr.options}
+                  onChange={(e) => setAttr((p) => ({ ...p, options: e.target.value }))}
+                  placeholder="Small, Medium, Large"
+                />
+              )}
               <Button
                 variant="primary"
-                disabled={!attr.key || !attr.label || addAttribute.isPending}
+                disabled={
+                  !attr.key
+                  || !attr.label
+                  || (needsOptions && !attr.options.trim())
+                  || addAttribute.isPending
+                }
                 onClick={() => addAttribute.mutate()}
               >
                 Add

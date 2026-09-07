@@ -80,7 +80,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-5)' }}>
+        <div className={ui.split}>
           <section>
             <p className={ui.sectionLabel}>Active campaigns</p>
             {activeCampaigns.length === 0 ? (

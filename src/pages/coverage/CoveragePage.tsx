@@ -83,12 +83,15 @@ export const CoveragePage: React.FC = () => {
   });
 
   const items = coverage.data?.items ?? [];
+  // Instagram publishes no view count, so a page of Instagram coverage has nothing to total.
+  // Summing nulls as zeros would print a confident "0 views" under a page of real posts.
   const totals = items.reduce(
     (acc, item) => ({
-      views: acc.views + item.views,
+      views: acc.views + (item.views ?? 0),
+      viewedPosts: acc.viewedPosts + (item.views === null ? 0 : 1),
       engagements: acc.engagements + item.likes + item.comments + (item.shares ?? 0) + (item.saves ?? 0),
     }),
-    { views: 0, engagements: 0 },
+    { views: 0, viewedPosts: 0, engagements: 0 },
   );
 
   return (
@@ -127,7 +130,14 @@ export const CoveragePage: React.FC = () => {
         </div>
         <div className={`${ui.stat} ${ui.statTintLime}`}>
           <p className={ui.statLabel}>Views</p>
-          <div className={ui.statValue}>{number.format(totals.views)}</div>
+          <div className={ui.statValue}>
+            {totals.viewedPosts === 0 ? 'Not tracked' : number.format(totals.views)}
+          </div>
+          {totals.viewedPosts > 0 && totals.viewedPosts < items.length && (
+            <p className={ui.statNote}>
+              From {totals.viewedPosts} of {items.length} posts; Instagram publishes no view count.
+            </p>
+          )}
         </div>
         <div className={`${ui.stat} ${ui.statTintLemon}`}>
           <p className={ui.statLabel}>Engagements</p>
@@ -217,7 +227,13 @@ export const CoveragePage: React.FC = () => {
                       </td>
                       <td>{item.platform}</td>
                       <td>{item.contentForm === 'LONG' ? 'Long' : 'Short'}</td>
-                      <td className={ui.numeric}>{number.format(item.views)}</td>
+                      <td className={ui.numeric}>
+                        {item.views === null ? (
+                          <span className={ui.cellMuted}>Not tracked</span>
+                        ) : (
+                          number.format(item.views)
+                        )}
+                      </td>
                       <td className={ui.numeric}>{item.er}%</td>
                       <td className={ui.cellMuted}>
                         {new Date(item.postedAt).toLocaleDateString('en-GB')}
@@ -355,7 +371,7 @@ const LogPostModal: React.FC<{ onClose: () => void; onSaved: () => void }> = ({
         onChange={(event) => setForm({ ...form, url: event.target.value })}
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
+      <div className={ui.pair}>
         <Select
           label="Platform"
           value={form.platform}
