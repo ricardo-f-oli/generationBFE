@@ -28,7 +28,6 @@ const baseMetrics: ReportMetrics = {
   shortFormPosts: 4,
   longFormPosts: 2,
   unsolicitedPosts: 1,
-  qualityBands: { Strong: 3 },
   conversionRate: null,
   reconciliation: null,
   creatorBreakdown: [],

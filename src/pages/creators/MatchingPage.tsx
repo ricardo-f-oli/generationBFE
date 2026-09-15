@@ -15,7 +15,7 @@ import styles from './Creators.module.css';
  * The brief asks for natural-language search. What is live today is indexed multi-field search
  * plus every classic filter, which is the honest half of that requirement — the free-text box
  * matches handle, name, location, niche and bio in the database. Semantic parsing of a phrase
- * like "London beauty creators who cycle" is a follow-up once the insights provider is wired.
+ * like "London beauty creators who cycle" is a follow-up, run against our own database.
  */
 export const MatchingPage: React.FC = () => {
   const navigate = useNavigate();

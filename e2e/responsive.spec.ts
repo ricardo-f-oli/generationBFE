@@ -21,7 +21,6 @@ import type { Page } from '@playwright/test';
 const ROUTES = [
   ['Dashboard', '/dashboard'],
   ['Creator database', '/creators'],
-  ['Discover', '/creators/discovery'],
   ['Matching', '/creators/matching'],
   ['Shortlists', '/creators/shortlists'],
   ['Registrations', '/creators/registrations'],

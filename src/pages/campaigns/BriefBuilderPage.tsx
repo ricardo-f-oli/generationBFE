@@ -34,7 +34,7 @@ export const BriefBuilderPage: React.FC = () => {
     budgetMax: '',
     timelineStart: '',
     timelineEnd: '',
-    toneOfVoice: 'CONVERSATIONAL' as ToneOfVoice,
+    toneOfVoice: 'PROFESSIONAL' as ToneOfVoice,
     additionalNotes: '',
   });
   const [deliverables, setDeliverables] = useState<string[]>(['Reel', 'Story']);

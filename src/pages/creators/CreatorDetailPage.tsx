@@ -18,15 +18,24 @@ import {
   fetchAttributeDefinitions,
   fetchAttributeValues,
   fetchCreator,
-  fetchDiscoveryStatus,
   fetchNotes,
+  fetchProfileRefreshStatus,
   fetchTags,
   setAttributeValue,
   suppressCreator,
   unassignTag,
 } from '../../services/creatorService';
+import { clipCreatorActivity } from '../../services/coverageService';
 import { ApiError } from '../../services/apiClient';
 import styles from './Creators.module.css';
+
+/** How each value of `insightsSource` is described on the profile. */
+const SOURCE_LABELS: Record<string, string> = {
+  INSTAGRAM_PUBLIC: 'Followers and bio from Instagram (public profile)',
+  YOUTUBE_PUBLIC: 'Subscribers from YouTube (public channel)',
+  INSTAGRAM_CONNECTED: 'Audience data from the creator’s connected Instagram',
+  LEGACY: 'Audience data from a former data provider — may be out of date',
+};
 
 /**
  * Requirements #16, #17, #18, #19, #26 all need a creator profile screen — the prototype had
@@ -95,30 +104,41 @@ export const CreatorDetailPage: React.FC = () => {
   });
 
   /**
-   * Requirement #26. The balance is read first so the button can say why it is unavailable —
-   * an "Enrich" that fails on an empty account is worse than one that is visibly off.
+   * Requirement #26. Which free platform sources are configured, so the refresh button can say
+   * why it is unavailable rather than failing when pressed.
    */
-  const discovery = useQuery({
-    queryKey: ['discovery-status'],
-    queryFn: fetchDiscoveryStatus,
+  const refreshStatus = useQuery({
+    queryKey: ['profile-refresh-status'],
+    queryFn: fetchProfileRefreshStatus,
     staleTime: 60_000,
   });
 
   const enrichMutation = useMutation({
-    // `force` re-buys a report that is still inside the freshness window, so it is only ever
-    // sent when someone has been told the figures are current and asked for them anyway.
     mutationFn: (force: boolean) => enrichCreator(id, force),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['creator', id] });
-      queryClient.invalidateQueries({ queryKey: ['discovery-status'] });
-      // A skip is not a failure and not a success. Say which, in the vendor's own words.
+      // A skip is not a failure and not a success; the server says which.
       if (result.refreshed) {
-        toast.success('Audience demographics updated');
+        toast.success('Public profile refreshed');
       } else {
         toast.info(result.reason);
       }
     },
-    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not reach the provider'),
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not refresh the profile'),
+  });
+
+  const clipMutation = useMutation({
+    mutationFn: () => clipCreatorActivity({ creatorId: id }),
+    onSuccess: (result) => {
+      toast.success(
+        result.captured === 0
+          ? result.duplicates > 0
+            ? 'No new posts; everything found is already in the coverage log.'
+            : 'No posts found for this creator from the configured sources.'
+          : `${result.captured} post${result.captured === 1 ? '' : 's'} added to the coverage log`,
+      );
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not clip posts'),
   });
 
   const anonymiseMutation = useMutation({
@@ -201,10 +221,19 @@ export const CreatorDetailPage: React.FC = () => {
                       <div className={ui.statValue}>{creator.data.followersDisplay}</div>
                     </div>
                     <div className={`${ui.stat} ${ui.statTintLime}`}>
-                      <p className={ui.statLabel}>Engagement</p>
+                      <p className={ui.statLabel}>Engagement rate</p>
                       <div className={ui.statValue}>
-                        {Number(creator.data.erPercentage).toFixed(1)}%
+                        {Number(creator.data.erPercentage).toFixed(2)}%
                       </div>
+                      {(creator.data.insightsSource === 'INSTAGRAM_PUBLIC'
+                        || creator.data.insightsSource === 'YOUTUBE_PUBLIC') && (
+                        <p className={ui.statNote}>
+                          Average of recent posts:{' '}
+                          {creator.data.primaryPlatform === 'YOUTUBE'
+                            ? '(likes + comments) ÷ views'
+                            : '(likes + comments) ÷ followers'}
+                        </p>
+                      )}
                     </div>
                     <div className={`${ui.stat} ${ui.statTintPeach}`}>
                       <p className={ui.statLabel}>Band</p>
@@ -313,8 +342,6 @@ export const CreatorDetailPage: React.FC = () => {
                     <dd>{creator.data.audienceAgeBand ?? 'Not known'}</dd>
                     <dt>Gender split</dt>
                     <dd>{creator.data.audienceGenderSplit ?? 'Not known'}</dd>
-                    <dt>Audience quality</dt>
-                    <dd>{creator.data.qualityBand ? humanise(creator.data.qualityBand) : 'Not known'}</dd>
                     <dt>Opt-in</dt>
                     <dd>
                       <Tag tone={statusTone(creator.data.optInStatus)}>
@@ -331,30 +358,40 @@ export const CreatorDetailPage: React.FC = () => {
                   */}
                   <div className={styles.enrichBar}>
                     <p className={styles.enrichProvenance}>
-                      {creator.data.insightsSource === 'MODASH' ? (
+                      {creator.data.insightsSource ? (
                         <>
-                          Audience data from Modash
+                          {SOURCE_LABELS[creator.data.insightsSource] ?? humanise(creator.data.insightsSource)}
                           {creator.data.insightsRefreshedAt &&
                             `, ${new Date(creator.data.insightsRefreshedAt).toLocaleDateString('en-GB')}`}
                         </>
                       ) : (
-                        'Audience data has not been measured — entered by hand or left blank.'
+                        'Not measured yet — entered by hand or left blank.'
                       )}
                     </p>
-                    {discovery.data?.live ? (
+                    {refreshStatus.data?.live ? (
                       <Button
                         variant="secondary"
-                        onClick={() => enrichMutation.mutate(creator.data.insightsSource === 'MODASH')}
+                        // Always forced: the person clicking has asked for fresh figures, and the
+                        // platform APIs are free.
+                        onClick={() => enrichMutation.mutate(true)}
                         disabled={enrichMutation.isPending}
                       >
-                        {enrichMutation.isPending
-                          ? 'Fetching…'
-                          : creator.data.insightsSource === 'MODASH'
-                            ? 'Refresh (1 credit)'
-                            : 'Fetch demographics (1 credit)'}
+                        {enrichMutation.isPending ? 'Refreshing…' : 'Refresh public profile'}
+                      </Button>
+                    ) : null}
+                    {refreshStatus.data?.live ? (
+                      <Button
+                        variant="secondary"
+                        onClick={() => clipMutation.mutate()}
+                        disabled={clipMutation.isPending}
+                      >
+                        {clipMutation.isPending ? 'Clipping…' : 'Clip recent posts'}
                       </Button>
                     ) : (
-                      <span className={ui.cellMuted}>Creator-data provider not connected.</span>
+                      <span className={ui.cellMuted}>
+                        Instagram / YouTube lookups are not configured on the server
+                        (META_ACCESS_TOKEN, YOUTUBE_API_KEY).
+                      </span>
                     )}
                   </div>
                 </section>

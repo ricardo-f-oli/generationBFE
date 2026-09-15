@@ -55,6 +55,17 @@ export function clipCreatorActivity(input: {
   return apiRequest<ClipResult>('/coverage/clip', { method: 'POST', body: input });
 }
 
+/**
+ * Requirements #11 and #15: reads each creator's recent posts and credits the ones carrying the
+ * campaign's tracking hashtag to the campaign.
+ */
+export function clipCampaignPosts(campaignId: string, creatorIds: string[]): Promise<ClipResult> {
+  return apiRequest<ClipResult>(`/coverage/campaigns/${campaignId}/clip`, {
+    method: 'POST',
+    body: { creatorIds },
+  });
+}
+
 /** Requirement #11: unsolicited coverage, found by brand name or monitored hashtags. */
 export function clipBrandMentions(limit = 25): Promise<ClipResult> {
   return apiRequest<ClipResult>(`/coverage/clip/mentions${qs({ limit })}`, { method: 'POST' });

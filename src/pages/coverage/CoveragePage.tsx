@@ -9,12 +9,13 @@ import { useToast } from '../../components/common/Toast';
 import { useDebouncedValue } from '../../components/common/useDebouncedValue';
 import {
   clipBrandMentions,
-  clipCreatorActivity,
+  clipCampaignPosts,
   createCoverageItem,
   deleteCoverageItem,
   downloadCoverageExport,
   fetchCoverageLog,
 } from '../../services/coverageService';
+import { fetchBoardForCampaign, fetchCampaigns } from '../../services/campaignService';
 import { ApiError } from '../../services/apiClient';
 import type { ClipResult } from '../../types';
 
@@ -35,6 +36,7 @@ export const CoveragePage: React.FC = () => {
   const [unsolicited, setUnsolicited] = useState('');
   const [page, setPage] = useState(0);
   const [addOpen, setAddOpen] = useState(false);
+  const [checkOpen, setCheckOpen] = useState(false);
   const [clipResult, setClipResult] = useState<ClipResult | null>(null);
 
   const debouncedQuery = useDebouncedValue(query, 300);
@@ -90,8 +92,10 @@ export const CoveragePage: React.FC = () => {
       views: acc.views + (item.views ?? 0),
       viewedPosts: acc.viewedPosts + (item.views === null ? 0 : 1),
       engagements: acc.engagements + item.likes + item.comments + (item.shares ?? 0) + (item.saves ?? 0),
+      reach: acc.reach + (item.reach ?? 0),
+      reachedPosts: acc.reachedPosts + (item.reach === null ? 0 : 1),
     }),
-    { views: 0, viewedPosts: 0, engagements: 0 },
+    { views: 0, viewedPosts: 0, engagements: 0, reach: 0, reachedPosts: 0 },
   );
 
   return (
@@ -101,6 +105,9 @@ export const CoveragePage: React.FC = () => {
         subtitle="Every post captured for this brand, solicited or not."
         actions={
           <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            <Button variant="secondary" onClick={() => setCheckOpen(true)}>
+              Check campaign posts
+            </Button>
             <Button
               variant="secondary"
               onClick={() => mentions.mutate()}
@@ -129,6 +136,15 @@ export const CoveragePage: React.FC = () => {
           <div className={ui.statValue}>{items.length}</div>
         </div>
         <div className={`${ui.stat} ${ui.statTintLime}`}>
+          <p className={ui.statLabel}>Estimated reach</p>
+          <div className={ui.statValue}>
+            {totals.reachedPosts === 0 ? 'Not tracked' : number.format(totals.reach)}
+          </div>
+          <p className={ui.statNote}>
+            Views where the platform publishes them; followers at posting time on Instagram.
+          </p>
+        </div>
+        <div className={`${ui.stat} ${ui.statTintGrey}`}>
           <p className={ui.statLabel}>Views</p>
           <div className={ui.statValue}>
             {totals.viewedPosts === 0 ? 'Not tracked' : number.format(totals.views)}
@@ -204,7 +220,9 @@ export const CoveragePage: React.FC = () => {
                     <th>Creator</th>
                     <th>Platform</th>
                     <th>Form</th>
+                    <th className={ui.numeric}>Reach</th>
                     <th className={ui.numeric}>Views</th>
+                    <th className={ui.numeric}>Engagements</th>
                     <th className={ui.numeric}>ER</th>
                     <th>Posted</th>
                     <th />
@@ -228,11 +246,21 @@ export const CoveragePage: React.FC = () => {
                       <td>{item.platform}</td>
                       <td>{item.contentForm === 'LONG' ? 'Long' : 'Short'}</td>
                       <td className={ui.numeric}>
+                        {item.reach === null ? (
+                          <span className={ui.cellMuted}>Not tracked</span>
+                        ) : (
+                          number.format(item.reach)
+                        )}
+                      </td>
+                      <td className={ui.numeric}>
                         {item.views === null ? (
                           <span className={ui.cellMuted}>Not tracked</span>
                         ) : (
                           number.format(item.views)
                         )}
+                      </td>
+                      <td className={ui.numeric}>
+                        {number.format(item.likes + item.comments)}
                       </td>
                       <td className={ui.numeric}>{item.er}%</td>
                       <td className={ui.cellMuted}>
@@ -287,6 +315,22 @@ export const CoveragePage: React.FC = () => {
         )}
       </AsyncBoundary>
 
+      {checkOpen && (
+        <CheckCampaignModal
+          onClose={() => setCheckOpen(false)}
+          onDone={(result) => {
+            setCheckOpen(false);
+            setClipResult(result);
+            queryClient.invalidateQueries({ queryKey: ['coverage'] });
+            toast.success(
+              result.captured === 0
+                ? 'No new posts found for this campaign.'
+                : `${result.captured} new post${result.captured === 1 ? '' : 's'} logged`,
+            );
+          }}
+        />
+      )}
+
       {addOpen && (
         <LogPostModal
           onClose={() => setAddOpen(false)}
@@ -301,12 +345,77 @@ export const CoveragePage: React.FC = () => {
   );
 };
 
+/**
+ * Requirements #11 and #15: reads the recent posts of every creator on the campaign's board and
+ * credits the ones carrying the campaign hashtag. Works for any platform with a configured source
+ * (YouTube today; Instagram once Meta approves the app).
+ */
+const CheckCampaignModal: React.FC<{ onClose: () => void; onDone: (result: ClipResult) => void }> = ({
+  onClose,
+  onDone,
+}) => {
+  const toast = useToast();
+  const campaigns = useQuery({ queryKey: ['campaigns', 'ACTIVE'], queryFn: () => fetchCampaigns('ACTIVE') });
+  const [campaignId, setCampaignId] = useState('');
+  const selected = campaigns.data?.items.find((c) => c.id === campaignId);
+
+  const check = useMutation({
+    mutationFn: async () => {
+      const board = await fetchBoardForCampaign(campaignId);
+      const creatorIds = [
+        ...new Set(board.columns.flatMap((column) => column.cards.map((card) => card.creatorId))),
+      ];
+      if (creatorIds.length === 0) {
+        throw new Error('This campaign has no creators on its board yet.');
+      }
+      return clipCampaignPosts(campaignId, creatorIds);
+    },
+    onSuccess: onDone,
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : 'Could not check the campaign'),
+  });
+
+  return (
+    <Modal
+      title="Check campaign posts"
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={() => check.mutate()} disabled={!campaignId || check.isPending}>
+            {check.isPending ? 'Checking…' : 'Check posts'}
+          </Button>
+        </>
+      }
+    >
+      <Select label="Campaign" value={campaignId} onChange={(event) => setCampaignId(event.target.value)}>
+        <option value="">Choose an active campaign</option>
+        {campaigns.data?.items.map((campaign) => (
+          <option key={campaign.id} value={campaign.id}>
+            {campaign.name}
+          </option>
+        ))}
+      </Select>
+      <p className={ui.cellMuted} style={{ fontSize: 'var(--fs-sm)' }}>
+        Reads the recent posts of every creator on this campaign&apos;s board. Posts whose caption
+        carries {selected?.trackingHashtag ? <strong>#{selected.trackingHashtag}</strong> : 'the campaign hashtag'}{' '}
+        are credited to the campaign, with reach and engagement.
+      </p>
+    </Modal>
+  );
+};
+
 const LogPostModal: React.FC<{ onClose: () => void; onSaved: () => void }> = ({
   onClose,
   onSaved,
 }) => {
   const toast = useToast();
+  const campaigns = useQuery({ queryKey: ['campaigns'], queryFn: () => fetchCampaigns() });
   const [form, setForm] = useState({
+    campaignId: '',
+    caption: '',
     creatorHandle: '',
     platform: 'INSTAGRAM',
     postType: 'REEL',
@@ -326,6 +435,8 @@ const LogPostModal: React.FC<{ onClose: () => void; onSaved: () => void }> = ({
     mutationFn: () =>
       createCoverageItem({
         creatorHandle: form.creatorHandle,
+        campaignId: form.campaignId || undefined,
+        caption: form.caption || undefined,
         platform: form.platform,
         postType: form.postType,
         url: form.url || undefined,
@@ -370,6 +481,24 @@ const LogPostModal: React.FC<{ onClose: () => void; onSaved: () => void }> = ({
         value={form.url}
         onChange={(event) => setForm({ ...form, url: event.target.value })}
       />
+      <Select
+        label="Campaign"
+        value={form.campaignId}
+        onChange={(event) => setForm({ ...form, campaignId: event.target.value })}
+      >
+        <option value="">No campaign</option>
+        {campaigns.data?.items.map((campaign) => (
+          <option key={campaign.id} value={campaign.id}>
+            {campaign.name}
+          </option>
+        ))}
+      </Select>
+      <Input
+        label="Caption"
+        placeholder="Paste the caption, including the campaign hashtag"
+        value={form.caption}
+        onChange={(event) => setForm({ ...form, caption: event.target.value })}
+      />
 
       <div className={ui.pair}>
         <Select
@@ -395,6 +524,7 @@ const LogPostModal: React.FC<{ onClose: () => void; onSaved: () => void }> = ({
         <Input
           label="Views"
           type="number"
+          hint="Leave blank for Instagram if unknown; reach then uses the creator's followers."
           value={form.views}
           onChange={(event) => setForm({ ...form, views: event.target.value })}
         />

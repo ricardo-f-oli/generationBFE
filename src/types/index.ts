@@ -61,8 +61,10 @@ export interface Creator {
   ukAudiencePct: number | null;
   audienceAgeBand: string | null;
   audienceGenderSplit: string | null;
-  qualityBand: string | null;
-  /** 'MODASH' when the four audience fields above were measured; null when typed by hand. */
+  /**
+   * Where the figures above were last measured: 'INSTAGRAM_PUBLIC', 'YOUTUBE_PUBLIC',
+   * 'INSTAGRAM_CONNECTED', 'LEGACY' (a former data provider) — or null when typed by hand.
+   */
   insightsSource: string | null;
   insightsRefreshedAt: string | null;
   optInStatus: string;
@@ -164,6 +166,8 @@ export interface Campaign {
   status: CampaignStatus;
   startDate: string | null;
   endDate: string | null;
+  /** The campaign's own hashtag (without #). Creators put it in their caption to be credited. */
+  trackingHashtag: string | null;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
@@ -340,6 +344,11 @@ export interface CoverageItem {
   saves: number | null;
   /** Null means "no data source supplies this", not zero. */
   impressions: number | null;
+  /**
+   * Estimated reach: views where the platform publishes them (YouTube, TikTok), otherwise the
+   * creator's follower count when the post was captured (Instagram). Null when neither was known.
+   */
+  reach: number | null;
   er: number;
   standardizedName: string;
   unsolicited: boolean;
@@ -533,7 +542,6 @@ export interface ReportMetrics {
   shortFormPosts: number;
   longFormPosts: number;
   unsolicitedPosts: number;
-  qualityBands: Record<string, number>;
   conversionRate: number | null;
   reconciliation: Reconciliation | null;
   creatorBreakdown: ReportCreatorRow[];
@@ -559,7 +567,6 @@ export interface ReportCreatorRow {
   comments: number;
   engagementRate: number | null;
   followerGrowth: number | null;
-  qualityBand: string | null;
   insightStatus: string | null;
 }
 
@@ -674,37 +681,18 @@ export interface AuditEntry {
   newValue: string | null;
 }
 
-// ------------------------------------------------- creator-data vendor (#23, #26)
+// ------------------------------------ public profile refresh (#26, free)
 
-/** Whether the vendor is connected, and what is left to spend on it. */
-export interface DiscoveryStatus {
+/** Which free platform sources the server is configured for. */
+export interface ProfileRefreshStatus {
+  /** True when at least one source below is configured. */
   live: boolean;
-  credits?: number;
-  rawRequests?: number;
-  checkedAt?: string;
-  /** True when the balance could not be read — distinct from a balance of nothing. */
-  balanceUnavailable?: boolean;
-}
-
-/** A creator found at the vendor who may or may not already be in our database. */
-export interface DiscoveredCreator {
-  handle: string;
-  name: string;
-  platform: string;
-  followers: number;
-  er?: number;
-  location?: string;
-  picture?: string;
-  externalId?: string;
-  existingCreatorId?: string;
-  alreadyInDatabase?: boolean;
-  /** Median views per post, when the vendor's search index supplies one. */
-  medianViews?: number;
-  /** Competitor-mention results only: how many matching posts, and their total engagements. */
-  posts?: number;
-  engagements?: number;
-  mention?: string;
-  latestUrl?: string;
+  instagram: boolean;
+  youtube: boolean;
+  /** Token encryption configured, so connected accounts can supply demographics. */
+  connections: boolean;
+  /** Where Instagram data comes from: 'META', or null when Instagram is not configured. */
+  instagramSource: 'META' | null;
 }
 
 export interface EnrichmentResult {

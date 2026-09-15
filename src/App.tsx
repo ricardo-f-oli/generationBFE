@@ -27,8 +27,6 @@ const CreatorDetailPage = lazy(() =>
   import('./pages/creators/CreatorDetailPage').then((m) => ({ default: m.CreatorDetailPage })));
 const MatchingPage = lazy(() =>
   import('./pages/creators/MatchingPage').then((m) => ({ default: m.MatchingPage })));
-const DiscoveryPage = lazy(() =>
-  import('./pages/creators/DiscoveryPage').then((m) => ({ default: m.DiscoveryPage })));
 const ShortlistsPage = lazy(() =>
   import('./pages/creators/ShortlistsPage').then((m) => ({ default: m.ShortlistsPage })));
 const RegistrationsPage = lazy(() =>
@@ -131,10 +129,11 @@ export const App: React.FC = () => (
                   {/* Creators */}
                   <Route path="/creators" element={<CreatorsPage />} />
                   <Route path="/creators/matching" element={<MatchingPage />} />
-                  <Route path="/creators/discovery" element={<DiscoveryPage />} />
                   <Route path="/creators/shortlists" element={<ShortlistsPage />} />
                   <Route path="/creators/registrations" element={<RegistrationsPage />} />
                   <Route path="/creators/taxonomy" element={<TaxonomyPage />} />
+                  {/* The vendor-backed discovery screen was removed; old links land on the database. */}
+                  <Route path="/creators/discovery" element={<Navigate to="/creators" replace />} />
                   <Route path="/creators/:id" element={<CreatorDetailPage />} />
 
                   {/* Campaigns */}

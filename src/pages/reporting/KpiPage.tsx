@@ -151,7 +151,7 @@ export const KpiPage: React.FC = () => {
                 label="Minimum UK audience %"
                 type="number"
                 step="1"
-                hint="Needs the creator-data provider to be measurable."
+                hint="Only measurable for creators who have connected their Instagram account."
                 value={form.minUkAudience}
                 onChange={(event) => setForm({ ...form, minUkAudience: event.target.value })}
               />

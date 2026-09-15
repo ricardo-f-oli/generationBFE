@@ -95,7 +95,14 @@ export const CampaignsPage: React.FC = () => {
               <tbody>
                 {campaigns.data?.items.map((campaign) => (
                   <tr key={campaign.id}>
-                    <td className={ui.cellStrong}>{campaign.name}</td>
+                    <td className={ui.cellStrong}>
+                      {campaign.name}
+                      {campaign.trackingHashtag && (
+                        <div className={ui.cellMuted} style={{ fontSize: 'var(--fs-xs)' }}>
+                          #{campaign.trackingHashtag}
+                        </div>
+                      )}
+                    </td>
                     <td className={ui.cellMuted}>{humanise(campaign.campaignType)}</td>
                     <td>
                       <Tag tone={statusTone(campaign.status)}>{humanise(campaign.status)}</Tag>
