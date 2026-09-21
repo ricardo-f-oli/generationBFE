@@ -9,6 +9,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   hasRole: (...roles: Role[]) => boolean;
 }
 
@@ -87,14 +88,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  /**
+   * The server revokes every existing token as part of the change, so the response carries a
+   * fresh pair. Storing them is what keeps the user signed in through their own password
+   * change rather than bouncing them to the login screen on success.
+   */
+  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    const result = await apiRequest<{ accessToken: string; refreshToken: string; user: User }>(
+      '/auth/change-password',
+      { method: 'POST', body: { currentPassword, newPassword } },
+    );
+    tokenStore.set(result.accessToken, result.refreshToken);
+    setUser(result.user);
+  }, []);
+
   const hasRole = useCallback(
     (...roles: Role[]) => (user ? roles.includes(user.role) : false),
     [user],
   );
 
   const value = useMemo(
-    () => ({ user, isLoading, login, logout, forgotPassword, resetPassword, hasRole }),
-    [user, isLoading, login, logout, forgotPassword, resetPassword, hasRole],
+    () => ({ user, isLoading, login, logout, forgotPassword, resetPassword, changePassword, hasRole }),
+    [user, isLoading, login, logout, forgotPassword, resetPassword, changePassword, hasRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

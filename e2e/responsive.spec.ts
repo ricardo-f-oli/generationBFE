@@ -47,6 +47,9 @@ const ROUTES = [
 
 /** Public routes, which a creator reaches on a phone far more often than a desktop. */
 const PUBLIC_ROUTES = [
+  // The front door, and the one page a creator reaches from an Instagram bio — so it is the
+  // page most likely to be opened on a phone.
+  ['Landing', '/'],
   ['Login', '/login'],
   ['Register', '/register'],
   ['Waitlist landing', '/join'],

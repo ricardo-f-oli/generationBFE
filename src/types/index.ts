@@ -29,6 +29,12 @@ export interface User {
   name: string;
   role: Role;
   brandId: string;
+  /**
+   * The account is still on the temporary password it was handed. Until it is changed the API
+   * refuses everything except the change-password call, so this is not a suggestion — it is the
+   * only thing the session can do.
+   */
+  mustChangePassword?: boolean;
 }
 
 // --------------------------------------------------------------- creators

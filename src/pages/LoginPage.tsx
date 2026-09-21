@@ -99,9 +99,6 @@ export const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        <p className={styles.footnote}>
-          Demo login: <strong>admin@generationb.dev</strong> / <strong>Password123!</strong>
-        </p>
       </div>
     </div>
   );

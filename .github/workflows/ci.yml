@@ -128,6 +128,21 @@ jobs:
           done
           echo "The backend never started:"; tail -60 backend.log; exit 1
 
+      # V44 puts the seeded accounts on a single-use password, and the API then refuses every
+      # endpoint until it is changed. Without this, signIn() lands on /change-password instead
+      # of the dashboard and all of the journeys below fail for a reason none of them is about.
+      #
+      # The forced-change flow is not going untested by being switched off here — it has its own
+      # coverage in the backend suite (ForcedPasswordChangeIntegrationTest), which asserts it
+      # against the API directly, the way someone skipping the UI would.
+      #
+      # Run through the postgres image rather than a bare `psql`, so the step does not depend on
+      # the runner image happening to ship a postgres client. The image is already pulled for the
+      # service container above, so this costs nothing.
+      - name: Clear the temporary-password flag on the seeded accounts
+        run: |
+          docker run --rm --network host -e PGPASSWORD=postgres postgres:16-alpine             psql -h localhost -U postgres -d generationb             -c "UPDATE users SET must_change_password = false;"
+
       - run: npm ci
 
       - name: Install the browsers

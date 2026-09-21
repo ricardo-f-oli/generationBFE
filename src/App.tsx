@@ -12,6 +12,8 @@ import { SESSION_EXPIRED_EVENT } from './services/apiClient';
 import { LoginPage } from './pages/LoginPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { ChangePasswordPage } from './pages/ChangePasswordPage';
+import { LandingPage } from './pages/public/LandingPage';
 import { RegisterPage } from './pages/public/RegisterPage';
 import { WaitlistLandingPage } from './pages/public/WaitlistLandingPage';
 import { UnsubscribePage } from './pages/public/UnsubscribePage';
@@ -111,9 +113,16 @@ export const App: React.FC = () => (
             <Suspense fallback={<Spinner fullPage label="Loading" />}>
               <Routes>
                 {/* Public */}
+                {/* The front door. Signed-in staff are redirected to the dashboard from
+                    inside the page, which is what the old protected index route did. */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                {/* Authenticated, but deliberately outside ProtectedLayout: an account on a
+                    temporary password is redirected here, and the app shell would offer it
+                    navigation that the API refuses. It checks the session itself. */}
+                <Route path="/change-password" element={<ChangePasswordPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/join" element={<WaitlistLandingPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
@@ -123,7 +132,6 @@ export const App: React.FC = () => (
 
                 {/* Authenticated */}
                 <Route element={<ProtectedLayout />}>
-                  <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
 
                   {/* Creators */}

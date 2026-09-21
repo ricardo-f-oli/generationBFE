@@ -1,0 +1,217 @@
+/* The public front door. Prototype tokens only — peach ground, Instrument Serif display,
+   thick black rules and the red accent, same vocabulary as the waitlist and register pages. */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-peach);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  padding: var(--space-5) var(--space-5) var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto var(--space-8);
+}
+
+.mark {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  line-height: 1;
+}
+
+.headerLink,
+.footerLink {
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-brand);
+  text-decoration: none;
+}
+
+.headerLink:hover,
+.footerLink:hover,
+.inlineLink:hover {
+  text-decoration: underline;
+}
+
+.headerLink:focus-visible,
+.footerLink:focus-visible,
+.inlineLink:focus-visible,
+.cta:focus-visible {
+  outline: var(--border-w-thick) solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  line-height: var(--lh-tight);
+  font-weight: var(--weight-regular);
+  margin: 0;
+}
+
+.displayMuted {
+  color: var(--text-muted);
+}
+
+.rule {
+  width: 120px;
+  height: 4px;
+  background: var(--color-red);
+  margin: var(--space-5) 0;
+}
+
+.lede {
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  margin: 0 0 var(--space-7);
+  max-width: 54ch;
+}
+
+/* Two equal cards: neither CTA is a consolation prize for the other. */
+.ctas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.cta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border: var(--border-w-thick) solid var(--border-default);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: transform 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+}
+
+/* Both hover rules restate `color`, and that is not redundant.
+ *
+ * global.css carries `a:hover { color: #a80006 }`. These cards are anchors, so that rule applies
+ * to them — and at specificity (0,1,1) it beats a bare class at (0,1,0). The first version of
+ * this file set only the hover background, to the same #a80006, and the result was red text on
+ * an identical red ground: a 1:1 contrast ratio, the label simply gone. Pinning the colour in
+ * the same rule is what keeps the global default out. */
+.ctaPrimary {
+  background: var(--color-red);
+  color: var(--text-inverse);
+  border-color: var(--color-red);
+}
+
+/* Inverting to black rather than deepening the red: at 21:1 it is the most legible pair in the
+   palette, it cannot collide with the global link colour whatever that becomes, and it reads as
+   a deliberate state change instead of a slightly darker rectangle. */
+.ctaPrimary:hover {
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+  border-color: var(--surface-inverse);
+}
+
+.ctaSecondary {
+  background: var(--color-white);
+  color: var(--text-primary);
+}
+
+.ctaSecondary:hover {
+  background: var(--surface-lemon);
+  color: var(--text-primary);
+}
+
+.ctaLabel {
+  font-size: var(--fs-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--lh-snug);
+}
+
+.ctaSub {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  opacity: 0.85;
+}
+
+.footnote {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--text-muted);
+  margin: var(--space-6) 0 0;
+  max-width: 54ch;
+}
+
+.inlineLink {
+  color: var(--text-brand);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 900px;
+  margin: var(--space-8) auto 0;
+  padding-top: var(--space-4);
+  border-top: var(--border-w) solid var(--border-default);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .display {
+    font-size: var(--fs-2xl);
+  }
+
+  .ctas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cta {
+    padding: var(--space-5);
+  }
+
+  .header {
+    margin-bottom: var(--space-6);
+  }
+}
+
+/* The lift reads as decoration, not information. */
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+
+  .cta:hover {
+    transform: none;
+  }
+}

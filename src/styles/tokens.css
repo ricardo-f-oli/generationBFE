@@ -7,6 +7,11 @@
   --color-peach: #F7D0B8;
   --color-lime: #E6FAA5;
   --color-white: #FFFFFF;
+  /* Validation-positive. The palette's lime is a surface — at 1.13:1 on white it cannot carry
+     text or a meter fill. This is the lime's readable counterpart: 5.08:1 on white, which is
+     deliberately the same weight as --color-red at 5.03:1, so "met" and "not met" read as two
+     equal states rather than one of them shouting. */
+  --color-green: #157F3C;
 
   /* Surfaces */
   --surface-page: var(--color-white);
@@ -21,6 +26,7 @@
   --text-inverse: var(--color-white);
   --text-brand: var(--color-red);
   --text-muted: #6B6B6B;
+  --text-success: var(--color-green);
 
   /* Borders */
   --border-default: var(--color-black);

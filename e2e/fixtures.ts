@@ -6,6 +6,12 @@ import { test as base, expect, type Page } from '@playwright/test';
  * Signing in goes through the real login form rather than injecting a token, because the
  * session handling — token storage, the refresh path, the redirect on expiry — is part of what
  * these tests exist to cover.
+ *
+ * These accounts are seeded on a single-use password (V44): the first login succeeds and the
+ * API then refuses everything until it is changed. The run therefore expects that flag to have
+ * been cleared first — CI does it in a step before this, and locally `docker compose up` plus
+ * one UPDATE does the same. If every journey here suddenly fails on the URL assertion below,
+ * that is the reason: the app redirected to /change-password, and it was right to.
  */
 export const DEMO = {
   admin: 'admin@generationb.dev',

@@ -3,11 +3,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
+import { MIN_PASSWORD_LENGTH, PasswordMeter } from '../components/common/PasswordMeter';
 import { ApiError } from '../services/apiClient';
 import styles from './AuthPages.module.css';
-
-/** Q-B9: the policy is 12 characters minimum, enforced server-side and mirrored here. */
-const MIN_PASSWORD_LENGTH = 12;
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -89,6 +87,7 @@ export const ResetPasswordPage: React.FC = () => {
               hint={`At least ${MIN_PASSWORD_LENGTH} characters. A memorable passphrase works well.`}
               required
             />
+            <PasswordMeter value={newPassword} />
             <Input
               label="Confirm new password"
               type="password"

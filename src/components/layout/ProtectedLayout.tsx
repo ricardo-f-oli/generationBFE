@@ -18,6 +18,13 @@ export const ProtectedLayout: React.FC = () => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // The API already refuses every one of these routes while the flag is set, so without this
+  // the user would reach the dashboard and watch every panel fail with a 403. The redirect is
+  // for legibility; the control itself lives on the server.
+  if (user.mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
+  }
+
   return <AppLayout />;
 };
 
