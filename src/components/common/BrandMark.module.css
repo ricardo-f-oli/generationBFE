@@ -1,0 +1,14 @@
+/* Brand names are lowercase even inside uppercase labels such as the workspace badge. */
+.name {
+  text-transform: none;
+  white-space: nowrap;
+}
+
+/* The logo's bar under the "b": thick, set just below the baseline, and only under the letter,
+   not the dot. Measured from the baseline so tight display line-heights don't collide with it. */
+.b {
+  text-decoration: underline;
+  text-decoration-thickness: max(1.5px, 0.07em);
+  text-underline-offset: 0.1em;
+  text-decoration-skip-ink: none;
+}

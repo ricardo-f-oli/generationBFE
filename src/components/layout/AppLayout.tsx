@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useIsMobileNav } from '../../hooks/useMediaQuery';
 import { isSectionActive, NAV_ITEMS, type NavItem } from './navConfig';
 import type { Role } from '../../types';
+import { BrandMark } from '../common/BrandMark';
 import styles from './AppLayout.module.css';
 
 /**
@@ -119,7 +120,7 @@ const SidebarBody: React.FC<{
         onNavigate?.();
       }}
     >
-      generation b.
+      <BrandMark name="product" />
     </button>
 
     <NavList {...rest} onNavigate={onNavigate} />
@@ -233,7 +234,7 @@ export const AppLayout: React.FC = () => {
             {/* Q-F11: the fake brand switcher is gone. A user belongs to one brand (Q-C13). */}
             <div className={styles.brandBadge}>
               <span>Workspace</span>
-              <span className={styles.brandName}>B. The Agency</span>
+              <span className={styles.brandName}><BrandMark name="agency" /></span>
             </div>
           </div>
 

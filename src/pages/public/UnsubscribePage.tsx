@@ -5,6 +5,7 @@ import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { unsubscribe } from '../../services/creatorService';
 import { ApiError } from '../../services/apiClient';
+import { BrandMark } from '../../components/common/BrandMark';
 import styles from './PublicPages.module.css';
 
 /**
@@ -29,7 +30,7 @@ export const UnsubscribePage: React.FC = () => {
     <div className={styles.landing}>
       <div className={styles.landingInner}>
         <header className={styles.landingHeader}>
-          <span className={styles.mark}>b.</span>
+          <span className={styles.mark}><BrandMark /></span>
         </header>
 
         {mutation.isSuccess ? (

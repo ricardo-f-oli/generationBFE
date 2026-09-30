@@ -35,7 +35,7 @@ function parseRgb(value: string): number[] {
 
 const CTAS = [
   ['Creator registration', 'Creator registration Tell us about your work and we’ll be in touch →'],
-  ['Team login', 'Team login For B. The Agency staff →'],
+  ['Team login', 'Team login For b. the agency staff →'],
 ] as const;
 
 test.describe('Landing page call-to-action', () => {

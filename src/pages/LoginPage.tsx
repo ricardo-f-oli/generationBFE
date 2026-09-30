@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { ApiError } from '../services/apiClient';
+import { BrandMark } from '../components/common/BrandMark';
 import styles from './AuthPages.module.css';
 
 /** Q-F12: the product language is English. */
@@ -44,7 +45,7 @@ export const LoginPage: React.FC = () => {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.brand}>
-          <h1 className={styles.logo}>generation b.</h1>
+          <h1 className={styles.logo}><BrandMark name="product" /></h1>
           <p className={styles.tagline}>Creator &amp; campaign management</p>
         </div>
 

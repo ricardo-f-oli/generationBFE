@@ -6,6 +6,7 @@ import { Input, Select, TextArea } from '../../components/common/Input';
 import { Modal } from '../../components/common/Modal';
 import { registerCreator } from '../../services/creatorService';
 import { ApiError } from '../../services/apiClient';
+import { BrandMark } from '../../components/common/BrandMark';
 import styles from './PublicPages.module.css';
 
 const TAG_OPTIONS = ['Elevated', 'Clean girl', 'Sporty', 'Editorial', 'Lifestyle', 'Comedy', 'Educational'];
@@ -93,7 +94,7 @@ export const RegisterPage: React.FC = () => {
     <div className={styles.landing}>
       <div className={styles.landingInner}>
         <header className={styles.landingHeader}>
-          <span className={styles.mark}>b.</span>
+          <span className={styles.mark}><BrandMark /></span>
           <Link to="/join" className={styles.backLink}>
             ← back
           </Link>
@@ -109,7 +110,7 @@ export const RegisterPage: React.FC = () => {
           </div>
         ) : (
           <>
-            <h1 className={styles.display}>join the b. creator community.</h1>
+            <h1 className={styles.display}>join the <BrandMark /> creator community.</h1>
             <p className={styles.lede}>
               Tell us a little about yourself and we&rsquo;ll be in touch.
             </p>

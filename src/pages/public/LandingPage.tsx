@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Spinner } from '../../components/common/Spinner';
+import { BrandMark } from '../../components/common/BrandMark';
 import styles from './Landing.module.css';
 
 /**
@@ -28,17 +29,17 @@ export const LandingPage: React.FC = () => {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <span className={styles.mark}>b.</span>
+        <span className={styles.mark}><BrandMark /></span>
         <Link to="/login" className={styles.headerLink}>
           Team login
         </Link>
       </header>
 
       <main className={styles.main}>
-        <p className={styles.eyebrow}>B. The Agency</p>
+        <p className={styles.eyebrow}><BrandMark name="agency" /></p>
 
         <h1 className={styles.display}>
-          generation b.
+          <BrandMark name="product" />
           <br />
           <span className={styles.displayMuted}>creators and brands, managed properly.</span>
         </h1>
@@ -61,7 +62,7 @@ export const LandingPage: React.FC = () => {
 
           <Link to="/login" className={`${styles.cta} ${styles.ctaSecondary}`}>
             <span className={styles.ctaLabel}>Team login</span>
-            <span className={styles.ctaSub}>For B. The Agency staff &rarr;</span>
+            <span className={styles.ctaSub}>For <BrandMark name="agency" /> staff &rarr;</span>
           </Link>
         </div>
 
@@ -73,7 +74,7 @@ export const LandingPage: React.FC = () => {
       </main>
 
       <footer className={styles.footer}>
-        <span>&copy; {new Date().getFullYear()} B. The Agency</span>
+        <span>&copy; {new Date().getFullYear()} <BrandMark name="agency" /></span>
         <Link to="/unsubscribe" className={styles.footerLink}>
           Email preferences
         </Link>

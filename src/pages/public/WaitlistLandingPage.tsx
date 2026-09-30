@@ -4,6 +4,7 @@ import { Button } from '../../components/common/Button';
 import { Input, Select } from '../../components/common/Input';
 import { joinWaitlist } from '../../services/marketingService';
 import { ApiError } from '../../services/apiClient';
+import { BrandMark } from '../../components/common/BrandMark';
 import styles from './PublicPages.module.css';
 
 /**
@@ -44,7 +45,7 @@ export const WaitlistLandingPage: React.FC = () => {
     <div className={styles.landing}>
       <div className={styles.landingInner}>
         <header className={styles.landingHeader}>
-          <span className={styles.mark}>b.</span>
+          <span className={styles.mark}><BrandMark /></span>
         </header>
 
         {mutation.isSuccess ? (
@@ -59,7 +60,7 @@ export const WaitlistLandingPage: React.FC = () => {
         ) : (
           <>
             <h1 className={styles.display}>
-              join the b.<br />creator community.
+              join the <BrandMark /><br />creator community.
             </h1>
             <p className={styles.lede}>
               We work with brands like Mediheal, Katie Loxton and Joma. Leave your details and
