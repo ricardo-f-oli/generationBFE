@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrandMark } from '../components/common/BrandMark';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/common/Button';
@@ -56,7 +57,7 @@ export const ResetPasswordPage: React.FC = () => {
       <div className={styles.card}>
         <div className={styles.brand}>
           <h1 className={styles.logo}>Choose a new password</h1>
-          <p className={styles.tagline}>Generation B</p>
+          <p className={styles.tagline}><BrandMark name="product" /></p>
         </div>
 
         {error && (

@@ -41,15 +41,33 @@ export const LandingPage: React.FC = () => {
         <h1 className={styles.display}>
           <BrandMark name="product" />
           <br />
-          <span className={styles.displayMuted}>creators and brands, managed properly.</span>
+          <span className={styles.displayMuted}>
+            UGC powered by our global community of creators
+          </span>
         </h1>
 
         <div className={styles.rule} />
 
+        {/* Client copy, 27 Oct 2026 — reproduce as supplied. */}
+        <div className={styles.copy}>
+          <p>
+            The best recommendations come from real people. <BrandMark name="product" /> connects
+            brands with creators who genuinely love their products, and turns that love into
+            content that&rsquo;s honest, scroll-stopping and built to sell.
+          </p>
+          <p>Trusted by Mediheal, COSRX, Tangle Teezer, Tweezerman, Water2, Gem and more.</p>
+          <p>
+            And because it&rsquo;s part of <BrandMark />, your UGC works hand in hand with your PR,
+            influencer and retail plans. Coverage, commerce, growth.
+          </p>
+          <p className={styles.copyClose}>
+            Let&rsquo;s make something people actually want to watch.
+          </p>
+        </div>
+
+        <h2 className={styles.subhead}>Want to create with us?</h2>
         <p className={styles.lede}>
-          The platform behind our campaigns with brands like Mediheal, Katie Loxton and Joma.
-          Creators apply once and we match them to briefs that actually fit. No mailing list,
-          no middlemen.
+          We&rsquo;re always looking for creators with a real voice and a genuine love of beauty.
         </p>
 
         <div className={styles.ctas}>

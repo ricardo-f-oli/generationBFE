@@ -223,7 +223,7 @@ export const AppLayout: React.FC = () => {
                   >
                     <Dialog.Title className={styles.srOnly}>Navigation</Dialog.Title>
                     <Dialog.Description className={styles.srOnly}>
-                      Sections of the Generation B workspace.
+                      Sections of the generation b. workspace.
                     </Dialog.Description>
                     <SidebarBody {...bodyProps} onNavigate={() => setMobileOpen(false)} />
                   </Dialog.Content>

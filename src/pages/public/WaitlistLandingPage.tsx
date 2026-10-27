@@ -53,18 +53,17 @@ export const WaitlistLandingPage: React.FC = () => {
             <h1 className={styles.display}>you&rsquo;re on the list.</h1>
             <div className={styles.rule} />
             <p className={styles.lede}>
-              Thanks for signing up. We&rsquo;ll be in touch as soon as Generation B opens up to
-              creators.
+              Thanks for signing up. We&rsquo;ll be in touch as soon as{' '}
+              <BrandMark name="product" /> opens up to creators.
             </p>
           </div>
         ) : (
           <>
-            <h1 className={styles.display}>
-              join the <BrandMark /><br />creator community.
-            </h1>
+            <h1 className={styles.display}>Want to create with us?</h1>
             <p className={styles.lede}>
-              We work with brands like Mediheal, Katie Loxton and Joma. Leave your details and
-              we&rsquo;ll let you know the moment we open applications.
+              We&rsquo;re always looking for creators with a real voice and a genuine love of
+              beauty. Leave your details and we&rsquo;ll let you know the moment we open
+              applications.
             </p>
 
             {error && <div className={styles.error}>{error}</div>}
@@ -114,8 +113,8 @@ export const WaitlistLandingPage: React.FC = () => {
                   onChange={(e) => setConsent(e.target.checked)}
                 />
                 <span>
-                  I agree to B. The Agency storing my details so they can contact me about creator
-                  opportunities. I can ask to be removed at any time.
+                  I agree to <BrandMark name="agency" /> storing my details so they can contact me
+                  about creator opportunities. I can ask to be removed at any time.
                 </span>
               </label>
 

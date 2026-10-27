@@ -4,11 +4,14 @@
   white-space: nowrap;
 }
 
-/* The logo's bar under the "b": thick, set just below the baseline, and only under the letter,
-   not the dot. Measured from the baseline so tight display line-heights don't collide with it. */
-.b {
-  text-decoration: underline;
-  text-decoration-thickness: max(1.5px, 0.07em);
-  text-underline-offset: 0.1em;
-  text-decoration-skip-ink: none;
+/* Sized off the surrounding text: the stem (798 of 1053 units) matches an ascender of ~0.72em,
+   and the bar hangs below the baseline the way a descender would, so the mark sits in a line of
+   type at any font size. */
+.logo {
+  display: inline-block;
+  height: 0.95em;
+  width: auto;
+  aspect-ratio: 745 / 1053;
+  vertical-align: -0.22em;
+  fill: var(--color-red);
 }

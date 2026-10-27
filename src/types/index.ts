@@ -505,13 +505,10 @@ export interface CreatorRegistrationPayload {
   bio?: string;
   portfolio?: string;
 
-  // Requirement #20: the five opt-in questions. Refusals are sent too — the server records
+  // Requirement #20: the two opt-in questions. Refusals are sent too — the server records
   // "said no" as evidence, which is a different fact from having nothing on file.
-  /** Required. Keep my details on file. */
+  /** Required. Keep my details on file, share them with brands, email me about campaigns. */
   consentGiven: boolean;
-  consentMarketingEmail: boolean;
-  consentGiftingAddress: boolean;
-  consentBrandSharing: boolean;
   consentContentReuse: boolean;
 }
 

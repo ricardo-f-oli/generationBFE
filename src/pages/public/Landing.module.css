@@ -92,6 +92,31 @@
   max-width: 54ch;
 }
 
+.copy {
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  max-width: 54ch;
+  margin: 0 0 var(--space-8);
+}
+
+.copy p {
+  margin: 0 0 var(--space-4);
+}
+
+.copyClose {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  line-height: var(--lh-snug);
+}
+
+.subhead {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  margin: 0 0 var(--space-3);
+}
+
 /* Two equal cards: neither CTA is a consolation prize for the other. */
 .ctas {
   display: grid;

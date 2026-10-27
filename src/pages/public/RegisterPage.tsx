@@ -38,21 +38,17 @@ export const RegisterPage: React.FC = () => {
   const [tags, setTags] = useState<string[]>([]);
 
   /**
-   * Requirement #20: the five opt-in questions.
+   * Requirement #20: the two opt-in questions (cut from five at the client's request, 27 Oct 2026).
    *
-   * One box covering storage, marketing, address sharing and content reuse is not specific
-   * consent to any of them under UK GDPR, and it is useless as evidence if a creator later says
-   * they never agreed to a brand seeing their rates. Only the first is required — without it
-   * there is nothing to store.
+   * The first is required and spells out everything joining means — kept on file, shown to
+   * brands, emailed about campaigns. Content reuse is not implied by joining, so it stays a
+   * separate choice. Gifting consent is asked on the address form when there is a parcel.
    *
-   * Every answer is sent, including the refusals: "said no on 4 March" is a materially different
+   * Both answers are sent, including a refusal: "said no on 4 March" is a materially different
    * record from "nothing on file", and only the first can be defended.
    */
   const [consents, setConsents] = useState({
     consentGiven: false,
-    consentMarketingEmail: false,
-    consentGiftingAddress: false,
-    consentBrandSharing: false,
     consentContentReuse: false,
   });
 
@@ -87,7 +83,7 @@ export const RegisterPage: React.FC = () => {
   });
 
   const firstName = form.fullName.trim().split(' ')[0] || 'there';
-  // Only the required question gates the form; the other four are genuinely optional.
+  // Only the required question gates the form; the other is genuinely optional.
   const canContinue = consents.consentGiven && form.fullName && form.email && form.instagram;
 
   return (
@@ -143,8 +139,8 @@ export const RegisterPage: React.FC = () => {
                       What may we do with your details?
                     </legend>
                     <p className={styles.consentIntro}>
-                      Only the first is needed to join. The rest are yours to choose, and you can
-                      change any of them later by emailing us \u2014 see our{' '}
+                      Only the first is needed to join. The second is up to you, and you can
+                      change either later by emailing us &mdash; see our{' '}
                       <button
                         type="button"
                         className={styles.backLink}
@@ -163,41 +159,10 @@ export const RegisterPage: React.FC = () => {
                         onChange={(e) => setConsent('consentGiven')(e.target.checked)}
                       />
                       <span>
-                        Keep my details on file so Generation B can consider me for campaigns.{' '}
+                        Keep my details on file, share my profile with the brands{' '}
+                        <BrandMark name="agency" /> works with, and email me about campaigns that
+                        suit my content.{' '}
                         <em className={styles.consentRequired}>Required</em>
-                      </span>
-                    </label>
-
-                    <label className={styles.consentRow}>
-                      <input
-                        type="checkbox"
-                        checked={consents.consentMarketingEmail}
-                        onChange={(e) => setConsent('consentMarketingEmail')(e.target.checked)}
-                      />
-                      <span>Email me about paid campaigns and collaborations that suit my content.</span>
-                    </label>
-
-                    <label className={styles.consentRow}>
-                      <input
-                        type="checkbox"
-                        checked={consents.consentGiftingAddress}
-                        onChange={(e) => setConsent('consentGiftingAddress')(e.target.checked)}
-                      />
-                      <span>
-                        Send me products to try. I understand my address is shared with the
-                        fulfilment partner who posts the parcel.
-                      </span>
-                    </label>
-
-                    <label className={styles.consentRow}>
-                      <input
-                        type="checkbox"
-                        checked={consents.consentBrandSharing}
-                        onChange={(e) => setConsent('consentBrandSharing')(e.target.checked)}
-                      />
-                      <span>
-                        Share my profile, audience figures and rates with the client brands
-                        Generation B works with.
                       </span>
                     </label>
 
@@ -208,8 +173,8 @@ export const RegisterPage: React.FC = () => {
                         onChange={(e) => setConsent('consentContentReuse')(e.target.checked)}
                       />
                       <span>
-                        Use posts I have published in campaign reports and in Generation B\u2019s
-                        own marketing.
+                        Use posts I have published in campaign reports and in{' '}
+                        <BrandMark name="product" />&rsquo;s own marketing.
                       </span>
                     </label>
                   </fieldset>
@@ -286,7 +251,7 @@ export const RegisterPage: React.FC = () => {
       {privacyOpen && (
         <Modal title="Privacy policy" onClose={() => setPrivacyOpen(false)}>
           <p style={{ margin: 0, fontSize: 'var(--fs-sm)', lineHeight: 'var(--lh-normal)' }}>
-            B. The Agency stores your details to manage creator partnerships and campaign
+            <BrandMark name="agency" /> stores your details to manage creator partnerships and campaign
             communications. We record when and how you gave consent, along with the version of this
             policy you accepted.
           </p>
