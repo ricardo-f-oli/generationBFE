@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedLayout, RequireRole } from './components/layout/ProtectedLayout';
@@ -33,6 +33,8 @@ const ShortlistsPage = lazy(() =>
   import('./pages/creators/ShortlistsPage').then((m) => ({ default: m.ShortlistsPage })));
 const RegistrationsPage = lazy(() =>
   import('./pages/creators/RegistrationsPage').then((m) => ({ default: m.RegistrationsPage })));
+const DiscoveryPage = lazy(() =>
+  import('./pages/creators/DiscoveryPage').then((m) => ({ default: m.DiscoveryPage })));
 const TaxonomyPage = lazy(() =>
   import('./pages/creators/TaxonomyPage').then((m) => ({ default: m.TaxonomyPage })));
 const CampaignsPage = lazy(() =>
@@ -140,8 +142,8 @@ export const App: React.FC = () => (
                   <Route path="/creators/shortlists" element={<ShortlistsPage />} />
                   <Route path="/creators/registrations" element={<RegistrationsPage />} />
                   <Route path="/creators/taxonomy" element={<TaxonomyPage />} />
-                  {/* The vendor-backed discovery screen was removed; old links land on the database. */}
-                  <Route path="/creators/discovery" element={<Navigate to="/creators" replace />} />
+                  {/* Requirement #23, through CreatorDB. */}
+                  <Route path="/creators/discovery" element={<DiscoveryPage />} />
                   <Route path="/creators/:id" element={<CreatorDetailPage />} />
 
                   {/* Campaigns */}

@@ -1,6 +1,11 @@
 import { apiRequest, apiRequestPaged, qs } from './apiClient';
 import type {
   AttributeDefinition,
+  AudienceReport,
+  AudienceReportOverview,
+  DiscoverySearchParams,
+  DiscoverySearchResult,
+  DiscoveryStatus,
   Creator,
   EnrichmentResult,
   ProfileRefreshStatus,
@@ -216,4 +221,27 @@ export function refreshStalestCreators(limit = 10, force = false): Promise<Enric
     `/creators/profile-refresh${qs({ limit, force })}`,
     { method: 'POST' },
   );
+}
+
+// ---------------------------------------------- CreatorDB discovery and audience reports
+
+export function fetchDiscoveryStatus(): Promise<DiscoveryStatus> {
+  return apiRequest<DiscoveryStatus>('/creators/discovery/status');
+}
+
+/** One page of creators from CreatorDB. Costs 1 credit. */
+export function discoverCreators(params: DiscoverySearchParams): Promise<DiscoverySearchResult> {
+  return apiRequest<DiscoverySearchResult>('/creators/discovery/search', { method: 'POST', body: params });
+}
+
+/** Stored audience reports. Free. */
+export function fetchAudienceReports(creatorId: string): Promise<AudienceReportOverview> {
+  return apiRequest<AudienceReportOverview>(`/creators/${creatorId}/audience-report`);
+}
+
+/** Buys a fresh audience report from CreatorDB. Costs 10 credits. */
+export function refreshAudienceReport(creatorId: string, platform?: string): Promise<AudienceReport> {
+  return apiRequest<AudienceReport>(`/creators/${creatorId}/audience-report${qs({ platform })}`, {
+    method: 'POST',
+  });
 }

@@ -31,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: '◈',
     children: [
       { label: 'Database', path: '/creators' },
+      { label: 'Discover', path: '/creators/discovery' },
       { label: 'Matching', path: '/creators/matching' },
       { label: 'Shortlists', path: '/creators/shortlists' },
       { label: 'Registrations', path: '/creators/registrations' },

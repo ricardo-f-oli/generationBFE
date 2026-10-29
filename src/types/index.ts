@@ -68,7 +68,7 @@ export interface Creator {
   audienceAgeBand: string | null;
   audienceGenderSplit: string | null;
   /**
-   * Where the figures above were last measured: 'INSTAGRAM_PUBLIC', 'YOUTUBE_PUBLIC',
+   * Where the figures above were last measured: 'CREATORDB', 'INSTAGRAM_PUBLIC', 'YOUTUBE_PUBLIC',
    * 'INSTAGRAM_CONNECTED', 'LEGACY' (a former data provider) — or null when typed by hand.
    */
   insightsSource: string | null;
@@ -696,6 +696,8 @@ export interface ProfileRefreshStatus {
   connections: boolean;
   /** Where Instagram data comes from: 'META', or null when Instagram is not configured. */
   instagramSource: 'META' | null;
+  /** CreatorDB configured: every platform, demographics included. */
+  creatorDb: boolean;
 }
 
 export interface EnrichmentResult {
@@ -736,4 +738,69 @@ export interface ManualSendBatch {
   sendable: number;
   skipped: number;
   items: ManualSendItem[];
+}
+
+// ------------------------------------------------- CreatorDB discovery and audience reports
+
+export type DiscoveryPlatform = 'INSTAGRAM' | 'TIKTOK' | 'YOUTUBE';
+
+export interface DiscoveryStatus {
+  /** CreatorDB is configured on the server. */
+  available: boolean;
+  /** The balance CreatorDB last reported, or null before the first call since startup. */
+  creditsAvailable: number | null;
+}
+
+export interface DiscoverySearchParams {
+  platform: DiscoveryPlatform;
+  /** Hashtags or keywords, space or comma separated. */
+  keywords?: string;
+  /** ISO country code of the creator, e.g. GB. */
+  country?: string;
+  minFollowers?: number;
+  maxFollowers?: number;
+  offset?: number;
+}
+
+export interface DiscoveredCreator {
+  platform: DiscoveryPlatform;
+  handle: string;
+  name: string;
+  followers: number | null;
+  avatarUrl: string | null;
+  profileUrl: string;
+  /** Set when the creator is already on the database. */
+  existingCreatorId: string | null;
+}
+
+export interface DiscoverySearchResult {
+  results: DiscoveredCreator[];
+  totalResults: number;
+  hasNextPage: boolean;
+  nextOffset: number | null;
+  creditsAvailable: number | null;
+}
+
+export interface AudienceShare {
+  /** Country as ISO alpha-2, or an age range such as "18-24". */
+  key: string;
+  pct: number;
+}
+
+export interface AudienceReport {
+  platform: DiscoveryPlatform;
+  handle: string | null;
+  fetchedAt: string;
+  source: string;
+  countries: AudienceShare[];
+  ageBands: AudienceShare[];
+  femalePct: number | null;
+  malePct: number | null;
+  averageAge: number | null;
+}
+
+export interface AudienceReportOverview {
+  available: boolean;
+  platforms: Array<{ platform: DiscoveryPlatform; handle: string }>;
+  reports: AudienceReport[];
 }

@@ -28,12 +28,14 @@ import {
 import { clipCreatorActivity } from '../../services/coverageService';
 import { ApiError } from '../../services/apiClient';
 import styles from './Creators.module.css';
+import { AudienceReportPanel } from './AudienceReportPanel';
 
 /** How each value of `insightsSource` is described on the profile. */
 const SOURCE_LABELS: Record<string, string> = {
   INSTAGRAM_PUBLIC: 'Followers and bio from Instagram (public profile)',
   YOUTUBE_PUBLIC: 'Subscribers from YouTube (public channel)',
   INSTAGRAM_CONNECTED: 'Audience data from the creator’s connected Instagram',
+  CREATORDB: 'Profile and audience from CreatorDB',
   LEGACY: 'Audience data from a former data provider — may be out of date',
 };
 
@@ -117,6 +119,8 @@ export const CreatorDetailPage: React.FC = () => {
     mutationFn: (force: boolean) => enrichCreator(id, force),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['creator', id] });
+      // With CreatorDB the refresh buys the audience report too; show it without a reload.
+      queryClient.invalidateQueries({ queryKey: ['audience-report', id] });
       // A skip is not a failure and not a success; the server says which.
       if (result.refreshed) {
         toast.success('Public profile refreshed');
@@ -226,12 +230,15 @@ export const CreatorDetailPage: React.FC = () => {
                         {Number(creator.data.erPercentage).toFixed(2)}%
                       </div>
                       {(creator.data.insightsSource === 'INSTAGRAM_PUBLIC'
-                        || creator.data.insightsSource === 'YOUTUBE_PUBLIC') && (
+                        || creator.data.insightsSource === 'YOUTUBE_PUBLIC'
+                        || creator.data.insightsSource === 'CREATORDB') && (
                         <p className={ui.statNote}>
                           Average of recent posts:{' '}
                           {creator.data.primaryPlatform === 'YOUTUBE'
                             ? '(likes + comments) ÷ views'
-                            : '(likes + comments) ÷ followers'}
+                            : creator.data.primaryPlatform === 'TIKTOK'
+                              ? '(likes + comments + shares) ÷ views'
+                              : '(likes + comments) ÷ followers'}
                         </p>
                       )}
                     </div>
@@ -389,12 +396,14 @@ export const CreatorDetailPage: React.FC = () => {
                       </Button>
                     ) : (
                       <span className={ui.cellMuted}>
-                        Instagram / YouTube lookups are not configured on the server
-                        (META_ACCESS_TOKEN, YOUTUBE_API_KEY).
+                        Creator data lookups are not configured on the server
+                        (CREATORDB_API_KEY, META_ACCESS_TOKEN, YOUTUBE_API_KEY).
                       </span>
                     )}
                   </div>
                 </section>
+
+                <AudienceReportPanel creatorId={id} />
 
                 {/* Requirement #19 — cross-brand engagement history */}
                 <section className={ui.panel}>
